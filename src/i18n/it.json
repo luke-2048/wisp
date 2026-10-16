@@ -1,0 +1,13 @@
+{
+  "appName": "Wisp",
+  "tray": {
+    "tooltip": "Wisp",
+    "showHide": "Mostra/Nascondi",
+    "settings": "Impostazioni",
+    "autostart": "Avvio automatico con Windows",
+    "quit": "Esci"
+  },
+  "island": {
+    "noTimer": "--"
+  }
+}

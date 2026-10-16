@@ -1,0 +1,79 @@
+// Wisp's palettes and the colour maths that derives every shade from a base colour.
+
+export type PaletteName = 'lilla' | 'menta' | 'pesca';
+
+export interface Palette {
+  base: string;
+  light: string; // done
+  dim: string; // break
+  night: string;
+  shadow: string;
+  warm: string;
+}
+
+export const palettes: Record<PaletteName, Palette> = {
+  lilla: {
+    base: '#DCD5FB',
+    light: '#E9E4FF',
+    dim: '#D2CDE2',
+    night: '#BDB6DD',
+    shadow: '#6E5FB8',
+    warm: '#F9CBEB',
+  },
+  menta: {
+    base: '#C9EEDF',
+    light: '#DDF7EC',
+    dim: '#CFDDD7',
+    night: '#A9CFC1',
+    shadow: '#3F8F7A',
+    warm: '#FFF5C8',
+  },
+  pesca: {
+    base: '#FFD8C6',
+    light: '#FFE6DA',
+    dim: '#E7D6CF',
+    night: '#E0B8A8',
+    shadow: '#C9735C',
+    warm: '#FFEFC2',
+  },
+};
+
+export const INK = '#2A2433';
+export const CHEEK = '#FF8FA3';
+const WHITE = '#FFFFFF';
+
+/** Linear mix: t = 0 gives `from`, t = 1 gives `to`. */
+export function mix(from: string, to: string, t: number): string {
+  const a = toRgb(from);
+  const b = toRgb(to);
+  const channel = (i: number) => Math.round(a[i] + (b[i] - a[i]) * t);
+  return toHex([channel(0), channel(1), channel(2)]);
+}
+
+/** The body shades used by the gradients, all derived from one base colour. */
+export interface BodyColors {
+  base: string;
+  highlight: string;
+  shade: string;
+  glow: string; // warm light through the bottom of the body
+  rim: string;
+}
+
+export function bodyColors(base: string, palette: Palette): BodyColors {
+  return {
+    base,
+    highlight: mix(base, WHITE, 0.65),
+    shade: mix(base, palette.shadow, 0.5),
+    glow: mix(base, palette.warm, 0.7),
+    rim: mix(base, WHITE, 0.75),
+  };
+}
+
+function toRgb(hex: string): [number, number, number] {
+  const n = parseInt(hex.slice(1), 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function toHex(rgb: [number, number, number]): string {
+  return '#' + rgb.map((c) => c.toString(16).padStart(2, '0').toUpperCase()).join('');
+}

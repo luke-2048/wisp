@@ -8,19 +8,59 @@ body {
   user-select: none;
 }
 
-#app {
-  display: flex;
-  justify-content: center;
+/* Same size as the closed window: 300x84 logical pixels. */
+.island {
+  position: relative;
+  width: 300px;
+  height: 84px;
 }
 
-.placeholder {
+.bar {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 30px;
   width: 240px;
   height: 30px;
   background: #000;
   border-radius: 0 0 14px 14px;
-  color: #fff;
-  font-size: 12px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
+  padding: 0 14px;
+  box-sizing: border-box;
+}
+
+.timer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+/* Wisp sits behind the bar. The body is 80 of the 120 viewBox units tall, so a
+   108 px SVG gives a ~72 px Wisp. Shifted up so the top of the head hides
+   behind the bar and the eyes start just below it. */
+.peek {
+  position: absolute;
+  z-index: 1;
+  top: -18px;
+  left: 50%;
+  width: 108px;
+  height: 108px;
+  transform: translateX(-50%);
+}
+
+.wisp {
+  display: block;
+  width: 100%;
+  height: 100%;
 }

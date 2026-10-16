@@ -39,7 +39,10 @@ local.
 ## Conventions
 
 - Code, identifiers and comments in **English**; UI text in **Italian**, only in
-  `src/i18n/it.ts`.
+  `src/i18n/it.json` (typed for the frontend by `it.ts`, read by Rust in
+  `src-tauri/src/i18n.rs` for the tray menu).
+- Closed island click-through goes through `Platform::set_click_through`: on Windows a
+  click-through window is layered and stays invisible unless its opacity is set.
 - Frontend: Vite + plain TypeScript + SVG, no UI framework.
 - Before committing: `cargo fmt --all`, `cargo clippy --workspace -- -D warnings`,
   `cargo test --workspace`, `npm run lint`, `npm run format:check`.
