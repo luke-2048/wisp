@@ -1,0 +1,50 @@
+# CD: pushing a tag like v0.1.0 builds the Windows installers (NSIS .exe and
+# .msi) and attaches them to a GitHub release with the same name.
+#
+#   git tag v0.1.0
+#   git push origin v0.1.0
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+# Needed to create the release and upload the installers.
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: npm ci
+
+      # Runs `npm run build` (beforeBuildCommand) and `tauri build`, then
+      # creates the release and uploads the bundles.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tagName: ${{ github.ref_name }}
+          releaseName: Wisp ${{ github.ref_name }}
+          releaseBody: |
+            Windows installers for Wisp ${{ github.ref_name }}.
+
+            - `Wisp_*_x64-setup.exe`: recommended installer.
+            - `Wisp_*_x64_en-US.msi`: for managed installs.
+
+            Windows may show a SmartScreen warning because the app is not signed:
+            choose "More info" → "Run anyway".
+          releaseDraft: false
+          prerelease: false

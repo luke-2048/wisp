@@ -1,0 +1,50 @@
+# CI: on every push and pull request, run the same checks as before a commit.
+# Windows only: the app uses Windows APIs (src-tauri/src/platform/windows.rs).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# A newer push to the same branch cancels the run that is still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: npm ci
+
+      - name: Frontend lint and format
+        run: |
+          npm run lint
+          npm run format:check
+
+      # Also needed by the Rust build: Tauri embeds the built frontend (dist/).
+      - name: Frontend build
+        run: npm run build
+
+      - name: Rust format
+        run: cargo fmt --all --check
+
+      - name: Rust lint
+        run: cargo clippy --workspace -- -D warnings
+
+      - name: Rust tests
+        run: cargo test --workspace

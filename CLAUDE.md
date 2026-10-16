@@ -73,4 +73,9 @@ local.
 - Frontend: Vite + plain TypeScript + SVG, no UI framework.
 - Before committing: `cargo fmt --all`, `cargo clippy --workspace -- -D warnings`,
   `cargo test --workspace`, `npm run lint`, `npm run format:check`.
-- Default branch `main`. License MIT.
+- Default branch `main`. License MIT. Public repo: https://github.com/luke-2048/wisp
+  (account `luke-2048`; commits use the GitHub noreply email set in the local git config).
+- CI (`.github/workflows/ci.yml`) runs the checks above on `windows-latest` for every push
+  and PR. Release: set the same version in `package.json`, `Cargo.toml` (workspace) and
+  `src-tauri/tauri.conf.json`, commit, then push a `vX.Y.Z` tag; `release.yml` publishes
+  the `.exe` and `.msi`. Never push a tag without the owner asking.
