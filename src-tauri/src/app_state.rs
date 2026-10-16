@@ -142,8 +142,8 @@ pub fn set_task(app: &AppHandle, text: &str) {
     });
 }
 
-/// "Fatto": Wisp celebrates, the task goes to today's list, the field empties.
-/// The timer keeps going: it is a block of focus, not tied to one task.
+/// "Fatto": Wisp celebrates, the task goes to today's list, the field empties
+/// and the timer stops, ready for the next task.
 pub fn task_done(app: &AppHandle) {
     change(app, |inner, now| {
         if let Some(title) = inner.task.take() {
@@ -152,6 +152,7 @@ pub fn task_done(app: &AppHandle) {
                 done_at: Local::now(),
             });
             inner.input.done_until = Some(now + DONE_DURATION);
+            inner.timer.stop(now);
         }
     });
 }

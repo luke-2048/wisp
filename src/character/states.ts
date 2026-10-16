@@ -9,6 +9,14 @@ export type Eyes = 'dot' | 'side' | 'wide' | 'tired' | 'happy' | 'closed';
 export type Mouth = 'calm' | 'wavy' | 'flat' | 'o' | 'grin' | 'sleep';
 export type Arms = 'down' | 'up';
 
+/**
+ * How the mini Wisp in the closed bar calls you:
+ * - 'soft': a slow lilac glow (break, done);
+ * - 'alert': a red blink, only when the timer has ended (owner's choice: the
+ *   mini Wisp is small, a soft glow is easy to miss).
+ */
+export type Attention = 'none' | 'soft' | 'alert';
+
 export interface Look {
   eyes: Eyes;
   mouth: Mouth;
@@ -19,8 +27,7 @@ export interface Look {
   bodyOpacity: number;
   /** CSS transform of the whole character, around the bottom of the body. */
   pose: string;
-  /** Wisp has something to tell you: the mini Wisp in the bar glows. */
-  attention: boolean;
+  attention: Attention;
 }
 
 export const looks: Record<WispState, Look> = {
@@ -31,7 +38,7 @@ export const looks: Record<WispState, Look> = {
     color: 'base',
     bodyOpacity: 1,
     pose: 'none',
-    attention: false,
+    attention: 'none',
   },
   distracted: {
     eyes: 'side',
@@ -40,7 +47,7 @@ export const looks: Record<WispState, Look> = {
     color: 'base',
     bodyOpacity: 0.4,
     pose: 'rotate(-8deg)',
-    attention: false,
+    attention: 'none',
   },
   break: {
     eyes: 'tired',
@@ -49,7 +56,7 @@ export const looks: Record<WispState, Look> = {
     color: 'dim',
     bodyOpacity: 0.92,
     pose: 'scale(1.06, 0.92)',
-    attention: true,
+    attention: 'soft',
   },
   waiting: {
     eyes: 'wide',
@@ -58,7 +65,7 @@ export const looks: Record<WispState, Look> = {
     color: 'base',
     bodyOpacity: 1,
     pose: 'translateY(-6px)',
-    attention: true,
+    attention: 'alert',
   },
   done: {
     eyes: 'happy',
@@ -67,7 +74,7 @@ export const looks: Record<WispState, Look> = {
     color: 'light',
     bodyOpacity: 1,
     pose: 'translateY(-4px)',
-    attention: true,
+    attention: 'soft',
   },
   night: {
     eyes: 'closed',
@@ -76,6 +83,6 @@ export const looks: Record<WispState, Look> = {
     color: 'night',
     bodyOpacity: 0.95,
     pose: 'translateY(5px)',
-    attention: false,
+    attention: 'none',
   },
 };

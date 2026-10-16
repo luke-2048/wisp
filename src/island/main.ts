@@ -1,12 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { palettes } from '../character/colors';
-import { looks } from '../character/states';
+import { looks, type WispState } from '../character/states';
 import { applyState, renderWisp } from '../character/wisp';
 import { it } from '../i18n/it';
 import './island.css';
 import { panelHtml, setupPanel } from './panel';
 import type { Snapshot } from './snapshot';
+import { playDone, playTimerEnd } from './sounds';
 
 // The island draws what the backend tells it:
 // - `wisp://island` opens or closes it (Rust watches the cursor);
@@ -37,7 +38,6 @@ if (app) {
 
   const q = <T extends Element>(selector: string) => app.querySelector<T>(selector)!;
   const island = q<HTMLDivElement>('.island');
-  const mini = q<HTMLSpanElement>('.mini');
   const barTimer = q<HTMLSpanElement>('.timer');
   const minutes = q<HTMLSpanElement>('.minutes');
   const time = q<HTMLDivElement>('.time');
@@ -60,11 +60,22 @@ if (app) {
     progress.style.width = `${Math.min(100, Math.max(0, elapsed * 100))}%`;
   };
 
+  let previous: WispState | null = null;
+
   const show = (snapshot: Snapshot) => {
     for (const svg of wisps) {
       applyState(svg, snapshot.state, palette);
     }
-    mini.classList.toggle('attention', looks[snapshot.state].attention);
+    // 'none' | 'soft' | 'alert': island.css makes the closed bar call you.
+    island.dataset.attention = looks[snapshot.state].attention;
+
+    // A sound only when the state changes, never for the first snapshot.
+    if (previous !== null && previous !== snapshot.state) {
+      if (snapshot.state === 'waiting') playTimerEnd();
+      if (snapshot.state === 'done') playDone();
+    }
+    previous = snapshot.state;
+
     barTimer.classList.toggle('paused', snapshot.timer.status === 'paused');
     timer = {
       status: snapshot.timer.status,

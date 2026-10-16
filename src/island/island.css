@@ -87,19 +87,69 @@ body {
   height: 24px;
 }
 
-/* Wisp has something to say (timer over, break, done): a soft, slow glow.
-   Not used yet; the states arrive in step 2. */
-.mini.attention {
-  animation: attention 2s ease-in-out infinite;
+/* Wisp has something to say. Soft (break, done): a slow glow in the palette
+   colour. Alert (timer over): mini Wisp, timer dot and the closed bar's edge
+   blink red, because a 24 px glow is easy to miss. Red is used only here
+   (owner's choice). */
+.island[data-attention='alert']:not(.open) .shape {
+  animation: bar-alert 1s ease-in-out infinite;
 }
 
-@keyframes attention {
+@keyframes bar-alert {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgba(255, 77, 94, 0.9),
+      0 2px 14px rgba(255, 77, 94, 0.7);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(255, 77, 94, 0),
+      0 2px 14px rgba(255, 77, 94, 0);
+  }
+}
+
+.island[data-attention='soft'] .mini {
+  animation: attention-soft 2s ease-in-out infinite;
+}
+
+.island[data-attention='alert'] .mini {
+  animation: attention-alert 1s ease-in-out infinite;
+}
+
+.island[data-attention='alert'] .dot {
+  animation: dot-alert 1s ease-in-out infinite;
+}
+
+@keyframes attention-soft {
   0%,
   100% {
     filter: drop-shadow(0 0 0 transparent);
   }
   50% {
     filter: drop-shadow(0 0 5px var(--palette-base));
+  }
+}
+
+@keyframes attention-alert {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px #ff4d5e) drop-shadow(0 0 7px #ff4d5e);
+  }
+  50% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+}
+
+@keyframes dot-alert {
+  0%,
+  100% {
+    background: #ff4d5e;
+    box-shadow: 0 0 6px #ff4d5e;
+  }
+  50% {
+    background: var(--palette-base);
+    box-shadow: none;
   }
 }
 
@@ -335,7 +385,22 @@ input.chip {
     transition: none;
   }
 
-  .mini.attention {
+  /* No blinking: the alert stays red and still. */
+  .island[data-attention] .mini,
+  .island[data-attention] .dot,
+  .island[data-attention] .shape {
     animation: none;
+  }
+
+  .island[data-attention='alert']:not(.open) .shape {
+    box-shadow: 0 2px 14px rgba(255, 77, 94, 0.7);
+  }
+
+  .island[data-attention='alert'] .mini {
+    filter: drop-shadow(0 0 4px #ff4d5e);
+  }
+
+  .island[data-attention='alert'] .dot {
+    background: #ff4d5e;
   }
 }

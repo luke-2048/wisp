@@ -32,8 +32,13 @@ local.
   least 5 min resets the count.
 - `night` runs from 23:00 to 05:00 (both configurable).
 - The focus streak (for `break`) is running timer time; it resets only after 5 min with no
-  timer running. "Fatto" does not stop the timer (a timer is a focus block, not a task).
+  timer running. "Fatto" also stops the timer (owner's choice).
 - "Ti aspetta" clears when the island is opened or closed (either way the user saw it).
+- Timer over ("Ti aspetta"): the closed bar blinks red (edge, mini Wisp, dot). This is the
+  only red in the app, an explicit exception to "no aggressive red" asked by the owner.
+- Sounds (Web Audio, synthesised in `src/island/sounds.ts`, no files): soft bells when the
+  timer ends, a bright arpeggio for "Fatto!". `additionalBrowserArgs` in tauri.conf.json
+  allows WebView2 to play them without a prior click.
 - Island window: always 580x266 and never resized (resizing a WebView mid-animation drops
   frames); closed = click-through, Rust polls the cursor every 20 ms; on hover clicks are
   re-enabled and CSS animates the black shape (spring open, smooth close). Closes 80 ms
