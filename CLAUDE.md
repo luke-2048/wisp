@@ -58,7 +58,7 @@ local.
   (`Settings::sanitized`) and stores one row per field in `settings` (JSON values), so new
   fields just get their default. The park shortcut uses Tauri accelerator syntax with
   `CommandOrControl`, which the macOS version will read as Cmd.
-- Data lives in `%APPDATA%\app.wisp.focus\wisp.sqlite3`; migrations in
+- Data lives in `%APPDATA%\app.wisp.focus\wisp.sqlite3`; migrations in
   `src-tauri/src/db/migrations.rs` are append-only. A running timer is not restored after
   a restart (on purpose); task, ideas and settings are.
 - Debug-forced state stays until "Automatico" is chosen in the debug submenu.
