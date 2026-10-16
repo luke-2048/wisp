@@ -13,7 +13,10 @@ use tauri::{
 };
 use wisp_core::hover::{HoverAction, HoverTracker};
 
-use crate::platform::{self, Platform};
+use crate::{
+    app_state,
+    platform::{self, Platform},
+};
 
 /// Window label, as declared in `tauri.conf.json`.
 const LABEL: &str = "island";
@@ -180,6 +183,7 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
         Some(HoverAction::Expand) => {
             platform::current().set_click_through(&window, false)?;
             app.emit(ISLAND_EVENT, IslandEvent { open: true })?;
+            app_state::island_opened(app);
         }
         Some(HoverAction::Collapse) => {
             app.emit(ISLAND_EVENT, IslandEvent { open: false })?;

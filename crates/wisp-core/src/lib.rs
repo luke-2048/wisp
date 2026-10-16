@@ -5,3 +5,4 @@
 
 pub mod hover;
 pub mod models;
+pub mod state_machine;

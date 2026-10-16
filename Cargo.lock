@@ -4628,6 +4628,7 @@ dependencies = [
 name = "wisp"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "serde",
  "serde_json",
  "tauri",
@@ -4642,6 +4643,7 @@ dependencies = [
 name = "wisp-core"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "serde",
  "serde_json",
 ]

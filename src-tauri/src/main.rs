@@ -1,6 +1,7 @@
 // In release builds, don't open a console window next to the app on Windows.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+mod app_state;
 mod i18n;
 mod island;
 mod platform;
@@ -18,9 +19,12 @@ fn main() {
         }))
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(island::IslandState::default())
+        .manage(app_state::AppState::default())
+        .invoke_handler(tauri::generate_handler![app_state::current_snapshot])
         .setup(|app| {
             island::setup(app.handle())?;
             tray::create(app.handle())?;
+            app_state::start_ticking(app.handle().clone());
             Ok(())
         })
         .on_window_event(|window, event| {
