@@ -33,7 +33,7 @@ local.
 - `night` runs from 23:00 to 05:00 (both configurable).
 - Island window: always 580x266 and never resized (resizing a WebView mid-animation drops
   frames); closed = click-through, Rust polls the cursor every 20 ms; on hover clicks are
-  re-enabled and CSS animates the black shape (spring open, smooth close). Closes 150 ms
+  re-enabled and CSS animates the black shape (spring open, smooth close). Closes 80 ms
   after the cursor leaves (owner found the brief's 600 ms too slow).
 - Closed island is only the 240x30 bar (owner's choice, overrides the brief's "Wisp peeks
   from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp blinks

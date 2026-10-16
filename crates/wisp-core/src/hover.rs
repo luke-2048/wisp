@@ -7,7 +7,7 @@ use std::time::{Duration, Instant};
 
 /// How long the cursor must stay away before the island closes. Short, but
 /// not zero, so brushing past the edge by a pixel does not close it.
-pub const CLOSE_DELAY: Duration = Duration::from_millis(150);
+pub const CLOSE_DELAY: Duration = Duration::from_millis(80);
 
 /// Length of the CSS closing animation (`src/island/island.css`); clicks start
 /// passing through again only after it.
