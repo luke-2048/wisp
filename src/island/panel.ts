@@ -1,9 +1,11 @@
-// The open panel's right column: task, timer and buttons.
+// The open panel's right column: task, timer and buttons, or the list of
+// parked ideas (ideas.ts) when the user clicks the line at the bottom.
 // Every button only tells the backend what the user did; the panel redraws
 // when the backend answers with a new snapshot.
 
 import { invoke } from '@tauri-apps/api/core';
 import { it } from '../i18n/it';
+import { ideasHtml, setupIdeas } from './ideas';
 import type { Snapshot } from './snapshot';
 
 const QUICK_MINUTES = [15, 25, 45];
@@ -13,6 +15,7 @@ export function panelHtml(): string {
     (m) => `<button class="chip" data-minutes="${m}">${m} ${it.island.minutes}</button>`,
   ).join('');
   return `
+    <div class="side" data-view="main">
     <div class="details" data-timer="idle">
       <div class="label">${it.island.now}</div>
       <div class="task-row">
@@ -34,11 +37,23 @@ export function panelHtml(): string {
         </div>
         <button class="chip done" disabled>${it.island.done}</button>
       </div>
+      <button class="ideas-link">
+        <span class="ideas-count">${it.ideas.none}</span>
+        <span class="ideas-hint">· ${it.ideas.hint}</span>
+      </button>
+    </div>
+    ${ideasHtml()}
     </div>`;
 }
 
-/** Wires the panel and returns a function that draws a snapshot on it. */
-export function setupPanel(root: HTMLElement): (snapshot: Snapshot) => void {
+export interface Panel {
+  draw(snapshot: Snapshot): void;
+  /** Back to task and timer (called when the island closes). */
+  reset(): void;
+}
+
+/** Wires the panel's buttons and fields. */
+export function setupPanel(root: HTMLElement): Panel {
   const q = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
   const details = q<HTMLDivElement>('.details');
   const task = q<HTMLDivElement>('.task');
@@ -46,6 +61,12 @@ export function setupPanel(root: HTMLElement): (snapshot: Snapshot) => void {
   const other = q<HTMLButtonElement>('.other');
   const custom = q<HTMLInputElement>('.custom');
   const done = q<HTMLButtonElement>('.done');
+  const side = q<HTMLDivElement>('.side');
+  const ideasCount = q<HTMLSpanElement>('.ideas-count');
+
+  const showView = (view: 'main' | 'ideas') => (side.dataset.view = view);
+  q('.ideas-link').addEventListener('click', () => showView('ideas'));
+  const drawIdeas = setupIdeas(root, () => showView('main'));
 
   let current: Snapshot | null = null;
 
@@ -112,11 +133,26 @@ export function setupPanel(root: HTMLElement): (snapshot: Snapshot) => void {
     field.addEventListener('blur', () => invoke('set_editing', { editing: false }));
   }
 
-  return (snapshot) => {
-    current = snapshot;
-    details.dataset.timer = snapshot.timer.status;
-    task.textContent = snapshot.task ?? it.island.taskPlaceholder;
-    task.classList.toggle('placeholder', snapshot.task === null);
-    done.disabled = snapshot.task === null;
+  return {
+    draw(snapshot) {
+      current = snapshot;
+      details.dataset.timer = snapshot.timer.status;
+      task.textContent = snapshot.task ?? it.island.taskPlaceholder;
+      task.classList.toggle('placeholder', snapshot.task === null);
+      done.disabled = snapshot.task === null;
+      ideasCount.textContent = countText(snapshot);
+      drawIdeas(snapshot.ideas);
+    },
+    reset() {
+      showView('main');
+    },
   };
+}
+
+/** "2 idee parcheggiate", counting only the ones not yet marked as seen. */
+function countText(snapshot: Snapshot): string {
+  const unseen = snapshot.unseen_ideas;
+  if (unseen === 1) return it.ideas.one;
+  if (unseen > 1) return it.ideas.many.replace('{n}', String(unseen));
+  return snapshot.ideas.length > 0 ? it.ideas.noneNew : it.ideas.none;
 }

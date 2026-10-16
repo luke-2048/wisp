@@ -28,5 +28,23 @@
     "waiting": "Ti aspetta",
     "done": "Fatto!",
     "night": "Buonanotte"
+  },
+  "ideas": {
+    "none": "Nessuna idea parcheggiata",
+    "noneNew": "Nessuna idea nuova",
+    "one": "1 idea parcheggiata",
+    "many": "{n} idee parcheggiate",
+    "hint": "Ctrl+Shift+Spazio per aggiungerne una",
+    "title": "Idee parcheggiate",
+    "back": "Indietro",
+    "seen": "Vista",
+    "delete": "Elimina",
+    "empty": "Nessuna idea, per ora.",
+    "today": "oggi"
+  },
+  "park": {
+    "title": "Parcheggia un'idea",
+    "placeholder": "Parcheggia un'idea…",
+    "hint": "Invio"
   }
 }

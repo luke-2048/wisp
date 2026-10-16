@@ -16,6 +16,7 @@ wisp-core = { path = "../crates/wisp-core" }
 tauri-plugin-single-instance = "2.5.4"
 tauri-plugin-autostart = "2.7.0"
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+tauri-plugin-global-shortcut = "2.4.1"
 
 # Same version Tauri uses, so window handles have the same type.
 [target.'cfg(windows)'.dependencies]

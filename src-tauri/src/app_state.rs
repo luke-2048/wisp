@@ -12,6 +12,7 @@ use chrono::{DateTime, Local};
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, State};
 use wisp_core::{
+    ideas::{Ideas, ParkedIdea},
     models::WispState,
     state_machine::{self, DONE_DURATION, StateInput, StateRules},
     timer::{FocusTimer, TimerEvent, TimerStatus},
@@ -35,6 +36,9 @@ pub struct Snapshot {
     pub state: WispState,
     pub task: Option<String>,
     pub timer: TimerSnapshot,
+    /// Newest first.
+    pub ideas: Vec<ParkedIdea>,
+    pub unseen_ideas: usize,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -59,6 +63,7 @@ struct Inner {
     task: Option<String>,
     timer: FocusTimer,
     done_today: Vec<DoneTask>,
+    ideas: Ideas,
     /// The last snapshot sent, so we only emit real changes.
     sent: Option<Snapshot>,
 }
@@ -81,6 +86,8 @@ impl Inner {
                 remaining_ms: millis(self.timer.remaining(now)),
                 total_ms: millis(self.timer.total()),
             },
+            ideas: self.ideas.newest_first(),
+            unseen_ideas: self.ideas.unseen_count(),
         }
     }
 }
@@ -177,6 +184,20 @@ pub fn timer_resume(app: &AppHandle) {
 
 pub fn timer_stop(app: &AppHandle) {
     change(app, |inner, now| inner.timer.stop(now));
+}
+
+pub fn park_idea(app: &AppHandle, text: &str) {
+    change(app, |inner, _| {
+        inner.ideas.park(text, Local::now().timestamp_millis());
+    });
+}
+
+pub fn idea_seen(app: &AppHandle, id: u64) {
+    change(app, |inner, _| inner.ideas.mark_seen(id));
+}
+
+pub fn idea_delete(app: &AppHandle, id: u64) {
+    change(app, |inner, _| inner.ideas.delete(id));
 }
 
 /// Re-evaluates and emits `wisp://state` if anything changed. While the timer

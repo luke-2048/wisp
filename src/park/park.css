@@ -1,0 +1,60 @@
+/* The window is 520x100 and transparent (src-tauri/src/park.rs): the black
+   pill sits in the middle with room around it for the shadow. */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+}
+
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.park {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 480px;
+  height: 56px;
+  box-sizing: border-box;
+  padding: 0 18px 0 14px;
+  background: #000;
+  border: 1px solid #26232c;
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+.icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  color: #fff;
+  background: transparent;
+  border: none;
+  outline: none;
+  font: inherit;
+  font-size: 17px;
+  caret-color: #dcd5fb;
+}
+
+.field::placeholder {
+  color: #6c6776;
+}
+
+.hint {
+  flex: none;
+  color: #6c6776;
+  font-size: 12px;
+}

@@ -36,6 +36,10 @@ local.
 - "Ti aspetta" clears when the island is opened or closed (either way the user saw it).
 - Timer over ("Ti aspetta"): the closed bar blinks red (edge, mini Wisp, dot). This is the
   only red in the app, an explicit exception to "no aggressive red" asked by the owner.
+- Park window (`park`, Ctrl+Shift+Space): Rust remembers the foreground window before
+  showing it and gives the focus back _before_ hiding it (Windows only allows passing the
+  focus on while we hold it). Clicking elsewhere just hides it. If the shortcut is taken by
+  another app, Wisp still starts. The ideas counter counts unseen ideas.
 - Sounds (Web Audio, synthesised in `src/island/sounds.ts`, no files): soft bells when the
   timer ends, a bright arpeggio for "Fatto!". `additionalBrowserArgs` in tauri.conf.json
   allows WebView2 to play them without a prior click.

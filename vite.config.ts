@@ -17,6 +17,7 @@ export default defineConfig({
       // One HTML page per Tauri window.
       input: {
         island: resolve(import.meta.dirname, 'island.html'),
+        park: resolve(import.meta.dirname, 'park.html'),
       },
     },
   },

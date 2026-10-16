@@ -4,6 +4,7 @@
 //! future macOS version can reuse it as-is.
 
 pub mod hover;
+pub mod ideas;
 pub mod models;
 pub mod state_machine;
 pub mod timer;

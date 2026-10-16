@@ -8,6 +8,11 @@ use tauri::{PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow};
 #[cfg(target_os = "windows")]
 mod windows;
 
+/// Another app's window, remembered so we can give it the focus back.
+/// Just a number (the OS handle), so it can be stored and passed between threads.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct ForeignWindow(pub isize);
+
 /// A `trait` is a list of methods a type promises to provide, like an
 /// interface. The macOS version will add its own type implementing it.
 pub trait Platform {
@@ -22,6 +27,12 @@ pub trait Platform {
         monitor: PhysicalRect<i32, u32>,
         island: PhysicalSize<u32>,
     ) -> PhysicalPosition<i32>;
+
+    /// The window the user is working in right now, if any.
+    fn foreground_window(&self) -> Option<ForeignWindow>;
+
+    /// Gives the focus back to a window remembered earlier.
+    fn focus_window(&self, window: ForeignWindow);
 }
 
 /// The platform Wisp is running on.

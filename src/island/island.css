@@ -211,8 +211,6 @@ body {
 }
 
 .details {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -269,7 +267,7 @@ body {
 .time {
   margin-top: 6px;
   color: #fff;
-  font-size: 38px;
+  font-size: 36px;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1;
@@ -366,6 +364,123 @@ input.chip {
   font-weight: 400;
   cursor: default;
   filter: none;
+}
+
+/* ---- Right column: main view or ideas list ---- */
+
+.side {
+  flex: 1;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.side[data-view='main'] .ideas-view,
+.side[data-view='ideas'] .details {
+  display: none;
+}
+
+.ideas-link {
+  margin-top: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: #8c8796;
+  font: inherit;
+  font-size: 11px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.ideas-link:hover .ideas-count {
+  color: #fff;
+}
+
+.ideas-hint {
+  color: #5d5866;
+}
+
+.ideas-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100%;
+  min-height: 0;
+}
+
+.ideas-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.back {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #e9e6ef;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.ideas-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0 6px 0 0;
+  list-style: none;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #3a3642 transparent;
+}
+
+.idea {
+  padding: 7px 0;
+  border-bottom: 1px solid #1c1a21;
+}
+
+.idea-text {
+  color: #fff;
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.idea.seen .idea-text {
+  color: #8c8796;
+}
+
+.idea-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 3px;
+  color: #6c6776;
+  font-size: 11px;
+}
+
+.idea-action {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #a9a3b4;
+  font: inherit;
+  cursor: pointer;
+}
+
+.idea-action:hover {
+  color: #fff;
+}
+
+.ideas-empty {
+  color: #6c6776;
+  font-size: 13px;
 }
 
 /* Closed bar: a paused timer simply looks quieter. */

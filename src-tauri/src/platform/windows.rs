@@ -1,8 +1,13 @@
 //! Windows implementation of `Platform`.
 
-use super::Platform;
+use super::{ForeignWindow, Platform};
 use tauri::{PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow};
-use windows::Win32::UI::WindowsAndMessaging::{LWA_ALPHA, SetLayeredWindowAttributes};
+use windows::Win32::{
+    Foundation::HWND,
+    UI::WindowsAndMessaging::{
+        GetForegroundWindow, LWA_ALPHA, SetForegroundWindow, SetLayeredWindowAttributes,
+    },
+};
 
 pub struct WindowsPlatform;
 
@@ -31,6 +36,20 @@ impl Platform for WindowsPlatform {
         // but positions can be negative on monitors left of the main one.
         let free_width = monitor.size.width as i32 - island.width as i32;
         PhysicalPosition::new(monitor.position.x + free_width / 2, monitor.position.y)
+    }
+
+    fn foreground_window(&self) -> Option<ForeignWindow> {
+        // SAFETY: no arguments; it only reads which window is active.
+        let hwnd = unsafe { GetForegroundWindow() };
+        (!hwnd.is_invalid()).then_some(ForeignWindow(hwnd.0 as isize))
+    }
+
+    fn focus_window(&self, window: ForeignWindow) {
+        // Windows allows this because Wisp is the foreground app at this moment
+        // (the user is typing in the park window). If the remembered window
+        // was closed meanwhile, the call simply fails and nothing happens.
+        let hwnd = HWND(window.0 as *mut std::ffi::c_void);
+        let _ = unsafe { SetForegroundWindow(hwnd) };
     }
 }
 

@@ -43,7 +43,7 @@ if (app) {
   const time = q<HTMLDivElement>('.time');
   const progress = q<HTMLDivElement>('.progress-fill');
   const wisps = [...app.querySelectorAll<SVGSVGElement>('svg.wisp')];
-  const drawPanel = setupPanel(app);
+  const panel = setupPanel(app);
 
   // Local countdown, re-synchronised by every snapshot.
   let timer = { status: 'idle', remainingMs: 0, totalMs: 0, endsAt: 0 };
@@ -83,7 +83,7 @@ if (app) {
       totalMs: snapshot.timer.total_ms,
       endsAt: performance.now() + snapshot.timer.remaining_ms,
     };
-    drawPanel(snapshot);
+    panel.draw(snapshot);
     drawTime();
   };
 
@@ -95,6 +95,8 @@ if (app) {
   void listen<Snapshot>('wisp://state', (event) => show(event.payload));
   void listen<{ open: boolean }>('wisp://island', (event) => {
     island.classList.toggle('open', event.payload.open);
+    // Next time it opens on task and timer, once the closing animation is over.
+    if (!event.payload.open) window.setTimeout(() => panel.reset(), 400);
   });
 
   window.setInterval(drawTime, 250);

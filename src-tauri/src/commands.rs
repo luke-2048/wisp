@@ -3,7 +3,7 @@
 
 use tauri::AppHandle;
 
-use crate::{app_state, island};
+use crate::{app_state, island, park};
 
 #[tauri::command]
 pub fn set_task(app: AppHandle, text: String) {
@@ -39,4 +39,26 @@ pub fn timer_stop(app: AppHandle) {
 #[tauri::command]
 pub fn set_editing(app: AppHandle, editing: bool) {
     island::set_keep_open(&app, editing);
+}
+
+/// Enter in the park window.
+#[tauri::command]
+pub fn park_idea(app: AppHandle, text: String) {
+    park::save(&app, &text);
+}
+
+/// Esc in the park window.
+#[tauri::command]
+pub fn park_cancel(app: AppHandle) {
+    park::cancel(&app);
+}
+
+#[tauri::command]
+pub fn idea_seen(app: AppHandle, id: u64) {
+    app_state::idea_seen(&app, id);
+}
+
+#[tauri::command]
+pub fn idea_delete(app: AppHandle, id: u64) {
+    app_state::idea_delete(&app, id);
 }
