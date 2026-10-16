@@ -5,8 +5,9 @@
 
 use std::time::{Duration, Instant};
 
-/// How long the cursor must stay away before the island closes.
-pub const CLOSE_DELAY: Duration = Duration::from_millis(600);
+/// How long the cursor must stay away before the island closes. Short, but
+/// not zero, so brushing past the edge by a pixel does not close it.
+pub const CLOSE_DELAY: Duration = Duration::from_millis(150);
 
 /// Length of the CSS closing animation (`src/island/island.css`); clicks start
 /// passing through again only after it.
@@ -135,25 +136,35 @@ mod tests {
         let t0 = Instant::now();
         let mut tracker = opened(t0);
         assert_eq!(tracker.update(false, t0 + ms(100)), None);
-        assert_eq!(tracker.update(false, t0 + ms(500)), None);
-        assert_eq!(tracker.update(true, t0 + ms(650)), None);
-        // The exit timer restarted: 600 ms from the new exit, not the old one.
-        assert_eq!(tracker.update(false, t0 + ms(700)), None);
-        assert_eq!(tracker.update(false, t0 + ms(1200)), None);
+        assert_eq!(
+            tracker.update(false, t0 + ms(100) + CLOSE_DELAY - ms(1)),
+            None
+        );
+        let back = t0 + ms(100) + CLOSE_DELAY - ms(1);
+        assert_eq!(tracker.update(true, back), None);
+        // The exit timer restarted: it counts from the new exit, not the old one.
+        let left_again = back + ms(10);
+        assert_eq!(tracker.update(false, left_again), None);
+        assert_eq!(
+            tracker.update(false, left_again + CLOSE_DELAY - ms(1)),
+            None
+        );
     }
 
     #[test]
-    fn closes_600_ms_after_leaving_then_shrinks_after_the_animation() {
+    fn closes_after_the_delay_then_shrinks_after_the_animation() {
         let t0 = Instant::now();
         let mut tracker = opened(t0);
-        assert_eq!(tracker.update(false, t0 + ms(100)), None);
-        assert_eq!(tracker.update(false, t0 + ms(699)), None);
+        let left = t0 + ms(100);
+        assert_eq!(tracker.update(false, left), None);
+        assert_eq!(tracker.update(false, left + CLOSE_DELAY - ms(1)), None);
+        let collapse_at = left + CLOSE_DELAY;
         assert_eq!(
-            tracker.update(false, t0 + ms(700)),
+            tracker.update(false, collapse_at),
             Some(HoverAction::Collapse)
         );
         assert!(tracker.is_expanded());
-        let shrink_at = t0 + ms(700) + CLOSE_ANIMATION;
+        let shrink_at = collapse_at + CLOSE_ANIMATION;
         assert_eq!(tracker.update(false, shrink_at - ms(1)), None);
         assert_eq!(tracker.update(false, shrink_at), Some(HoverAction::Shrink));
         assert!(!tracker.is_expanded());
@@ -165,11 +176,11 @@ mod tests {
         let mut tracker = opened(t0);
         tracker.update(false, t0);
         assert_eq!(
-            tracker.update(false, t0 + ms(600)),
+            tracker.update(false, t0 + CLOSE_DELAY),
             Some(HoverAction::Collapse)
         );
         assert_eq!(
-            tracker.update(true, t0 + ms(700)),
+            tracker.update(true, t0 + CLOSE_DELAY + ms(50)),
             Some(HoverAction::Expand)
         );
         assert_eq!(tracker.update(true, t0 + ms(2000)), None);
@@ -183,9 +194,10 @@ mod tests {
         assert_eq!(tracker.update(false, t0 + ms(100)), None);
         assert_eq!(tracker.update(false, t0 + ms(5000)), None);
         tracker.set_keep_open(false);
-        assert_eq!(tracker.update(false, t0 + ms(5100)), None);
+        let left = t0 + ms(5100);
+        assert_eq!(tracker.update(false, left), None);
         assert_eq!(
-            tracker.update(false, t0 + ms(5700)),
+            tracker.update(false, left + CLOSE_DELAY),
             Some(HoverAction::Collapse)
         );
     }
