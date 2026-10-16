@@ -17,6 +17,7 @@ fn main() {
             }
         }))
         .plugin(tauri_plugin_autostart::Builder::new().build())
+        .manage(island::IslandState::default())
         .setup(|app| {
             island::setup(app.handle())?;
             tray::create(app.handle())?;

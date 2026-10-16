@@ -1,4 +1,5 @@
-/* The window is transparent: only what we paint here is visible. */
+/* The window is transparent: only what we paint here is visible.
+   Rust sizes the window: 240x30 closed, 580x266 open (panel + shadow room). */
 html,
 body {
   margin: 0;
@@ -8,27 +9,73 @@ body {
   user-select: none;
 }
 
-/* Same size as the closed window: 300x84 logical pixels. */
 .island {
-  position: relative;
-  width: 300px;
-  height: 84px;
+  display: flex;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
 }
 
-.bar {
-  position: absolute;
-  z-index: 2;
-  top: 0;
-  left: 30px;
+/* One black shape that grows from the bar into the panel. */
+.shape {
+  position: relative;
   width: 240px;
   height: 30px;
   background: #000;
   border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  transition:
+    width 250ms ease,
+    height 250ms ease,
+    border-radius 250ms ease,
+    box-shadow 250ms ease;
+}
+
+.island.open .shape {
+  width: 540px;
+  height: 236px;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* ---- Closed bar ---- */
+
+.bar {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 30px;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 0 14px;
-  box-sizing: border-box;
+  justify-content: space-between;
+  padding: 0 14px 0 12px;
+  transition: opacity 120ms ease;
+}
+
+.island.open .bar {
+  opacity: 0;
+}
+
+.mini {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* Wisp has something to say (timer over, break, done): a soft, slow glow.
+   Not used yet; the states arrive in step 2. */
+.mini.attention {
+  animation: attention 2s ease-in-out infinite;
+}
+
+@keyframes attention {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 0 transparent);
+  }
+  50% {
+    filter: drop-shadow(0 0 5px var(--palette-base));
+  }
 }
 
 .timer {
@@ -44,23 +91,117 @@ body {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+  background: var(--palette-base);
 }
 
-/* Wisp sits behind the bar. The body is 80 of the 120 viewBox units tall, so a
-   108 px SVG gives a ~72 px Wisp. Shifted up so the top of the head hides
-   behind the bar and the eyes start just below it. */
-.peek {
+/* ---- Open panel ---- */
+
+.panel {
   position: absolute;
-  z-index: 1;
-  top: -18px;
-  left: 50%;
-  width: 108px;
-  height: 108px;
-  transform: translateX(-50%);
+  inset: 0;
+  width: 540px;
+  height: 236px;
+  box-sizing: border-box;
+  padding: 34px 36px 26px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  opacity: 0;
+  transition: opacity 100ms ease;
 }
+
+.island.open .panel {
+  opacity: 1;
+  transition: opacity 160ms ease 110ms;
+}
+
+.full {
+  flex: none;
+  width: 150px;
+  height: 150px;
+}
+
+.details {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  color: #8c8796;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.task {
+  color: #fff;
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.task.placeholder {
+  color: #77727f;
+}
+
+.time {
+  margin-top: 10px;
+  color: #fff;
+  font-size: 40px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.progress {
+  height: 4px;
+  border-radius: 2px;
+  background: #2a2730;
+  overflow: hidden;
+}
+
+.progress-fill {
+  width: 0;
+  height: 100%;
+  background: var(--palette-base);
+}
+
+/* ---- Wisp ---- */
 
 .wisp {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+.wisp-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 80ms ease;
+}
+
+.wisp-eyes.blink {
+  transform: scaleY(0.1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape,
+  .bar,
+  .panel,
+  .wisp-eyes {
+    transition: none;
+  }
+
+  .wisp-eyes.blink {
+    transform: none;
+  }
+
+  .mini.attention {
+    animation: none;
+  }
 }

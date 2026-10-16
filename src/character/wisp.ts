@@ -1,5 +1,5 @@
 // Wisp as a parametric SVG, built from assets/wisp.svg (viewBox 120x120).
-// Step 1 draws only the "focused" look; step 2 makes eyes, mouth, arms and
+// For now it draws only the "focused" look; step 2 makes eyes, mouth, arms and
 // body follow the state sent by the backend.
 
 import { CHEEK, INK, bodyColors, type Palette } from './colors';
@@ -8,18 +8,20 @@ export interface WispOptions {
   palette: Palette;
   /** Prefix for the SVG ids, so two Wisps on the same page don't clash. */
   id: string;
+  /** Small icon version for the closed bar: framed tightly, no ground shadow. */
+  mini?: boolean;
 }
 
 const BODY_PATH =
   'M60 26 C82 26 96 42 96 62 C96 78 88 88 78 92 C84 96 92 96 98 92 C96 102 84 106 72 100 ' +
   'C68 98 64 98 60 98 C40 98 24 84 24 62 C24 42 38 26 60 26 Z';
 
-export function renderWisp({ palette, id }: WispOptions): string {
+export function renderWisp({ palette, id, mini = false }: WispOptions): string {
   const c = bodyColors(palette.base, palette);
   const ref = (name: string) => `url(#${id}-${name})`;
 
   return `
-<svg class="wisp" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" aria-hidden="true">
+<svg class="wisp" xmlns="http://www.w3.org/2000/svg" viewBox="${mini ? '18 22 86 86' : '0 0 120 120'}" aria-hidden="true">
   <defs>
     <radialGradient id="${id}-body" cx="0.4" cy="0.32" r="0.78" fx="0.34" fy="0.24">
       <stop offset="0" stop-color="${c.highlight}"/>
@@ -49,8 +51,7 @@ export function renderWisp({ palette, id }: WispOptions): string {
     </mask>
   </defs>
 
-  <ellipse cx="60" cy="111" rx="20" ry="3.4" fill="#1D2230" opacity="0.22" filter="${ref('blurL')}"/>
-  <ellipse cx="60" cy="110" rx="15" ry="2" fill="${c.base}" opacity="0.45" filter="${ref('blurL')}"/>
+  ${mini ? '' : groundShadow(c.base, ref('blurL'))}
 
   <g class="wisp-float">
     <ellipse cx="26" cy="74" rx="5.2" ry="7.6" transform="rotate(28 26 74)" fill="${ref('body')}"/>
@@ -70,15 +71,23 @@ export function renderWisp({ palette, id }: WispOptions): string {
     <ellipse cx="37" cy="73" rx="6" ry="3.6" fill="${CHEEK}" opacity="0.6" filter="${ref('blurS')}"/>
     <ellipse cx="81" cy="73" rx="6" ry="3.6" fill="${CHEEK}" opacity="0.6" filter="${ref('blurS')}"/>
 
+    <g class="wisp-eyes">
     <ellipse cx="47" cy="64" rx="4.2" ry="5.6" fill="${ref('eye')}"/>
     <ellipse cx="71" cy="64" rx="4.2" ry="5.6" fill="${ref('eye')}"/>
     <circle cx="48.6" cy="61.8" r="1.7" fill="#FFFFFF"/>
     <circle cx="72.6" cy="61.8" r="1.7" fill="#FFFFFF"/>
     <circle cx="45.6" cy="66.2" r="0.8" fill="#FFFFFF"/>
     <circle cx="69.6" cy="66.2" r="0.8" fill="#FFFFFF"/>
+    </g>
 
     <path d="M55.5 72 Q57.25 74.6 59 72 Q60.75 74.6 62.5 72" fill="none" stroke="${INK}"
       stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>`;
+}
+
+function groundShadow(base: string, blur: string): string {
+  return `
+  <ellipse cx="60" cy="111" rx="20" ry="3.4" fill="#1D2230" opacity="0.22" filter="${blur}"/>
+  <ellipse cx="60" cy="110" rx="15" ry="2" fill="${base}" opacity="0.45" filter="${blur}"/>`;
 }

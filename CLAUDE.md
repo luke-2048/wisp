@@ -33,6 +33,10 @@ local.
 - `night` runs from 23:00 to 05:00 (both configurable).
 - Closed island: click-through window + cursor polling from Rust; on hover the window
   grows to the open size at once and CSS animates the panel.
+- Closed island is only the 240x30 bar (owner's choice, overrides the brief's "Wisp peeks
+  from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp blinks
+  and glows softly (`.attention`) only when it has something to say (waiting, break,
+  done). Step 3 (hover) was done before step 2 (states).
 - Default palette Lilla; Menta and Pesca selectable in settings.
 - Debug-forced state stays until "Automatico" is chosen in the debug submenu.
 

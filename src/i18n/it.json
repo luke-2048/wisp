@@ -8,6 +8,9 @@
     "quit": "Esci"
   },
   "island": {
-    "noTimer": "--"
+    "noTimer": "--",
+    "noTime": "--:--",
+    "now": "Adesso",
+    "taskPlaceholder": "Su cosa stai lavorando?"
   }
 }
