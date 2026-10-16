@@ -42,6 +42,19 @@
         "visible": false,
         "center": true,
         "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required"
+      },
+      {
+        "label": "settings",
+        "url": "settings.html",
+        "title": "Impostazioni di Wisp",
+        "width": 440,
+        "height": 640,
+        "resizable": false,
+        "maximizable": false,
+        "minimizable": true,
+        "visible": false,
+        "center": true,
+        "additionalBrowserArgs": "--disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection --autoplay-policy=no-user-gesture-required"
       }
     ],
     "security": {

@@ -2,6 +2,7 @@
 //! the backend; the backend decides what it means and sends `wisp://state`.
 
 use tauri::AppHandle;
+use wisp_core::models::Settings;
 
 use crate::{app_state, island, park};
 
@@ -61,4 +62,19 @@ pub fn idea_seen(app: AppHandle, id: u64) {
 #[tauri::command]
 pub fn idea_delete(app: AppHandle, id: u64) {
     app_state::idea_delete(&app, id);
+}
+
+/// The settings window saves on every change. Returns the settings as stored
+/// (values brought into range), or an error code for the shortcut field:
+/// "invalid" or "taken".
+#[tauri::command]
+pub fn update_settings(app: AppHandle, settings: Settings) -> Result<Settings, String> {
+    let settings = settings.sanitized();
+    let current = app_state::settings(&app);
+    if settings.park_shortcut != current.park_shortcut {
+        park::change_shortcut(&app, &current.park_shortcut, &settings.park_shortcut)
+            .map_err(str::to_string)?;
+    }
+    app_state::apply_settings(&app, settings.clone());
+    Ok(settings)
 }

@@ -34,7 +34,7 @@
     "noneNew": "Nessuna idea nuova",
     "one": "1 idea parcheggiata",
     "many": "{n} idee parcheggiate",
-    "hint": "Ctrl+Shift+Spazio per aggiungerne una",
+    "hint": "{shortcut} per aggiungerne una",
     "title": "Idee parcheggiate",
     "back": "Indietro",
     "seen": "Vista",
@@ -46,5 +46,40 @@
     "title": "Parcheggia un'idea",
     "placeholder": "Parcheggia un'idea…",
     "hint": "Invio"
+  },
+  "keys": {
+    "CommandOrControl": "Ctrl",
+    "Control": "Ctrl",
+    "Ctrl": "Ctrl",
+    "Shift": "Shift",
+    "Alt": "Alt",
+    "Super": "Win",
+    "Space": "Spazio"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "autosave": "Le modifiche si salvano da sole.",
+    "look": "Aspetto",
+    "palette": "Colore di Wisp",
+    "palettes": {
+      "lilla": "Lilla",
+      "menta": "Menta",
+      "pesca": "Pesca"
+    },
+    "ideas": "Parcheggio idee",
+    "shortcut": "Scorciatoia",
+    "shortcutHelp": "Funziona da qualsiasi programma.",
+    "recording": "Premi la combinazione…",
+    "needsModifier": "Usa almeno Ctrl o Alt insieme a un tasto.",
+    "shortcutTaken": "Questa combinazione è già usata da un altro programma.",
+    "shortcutInvalid": "Questa combinazione non si può usare.",
+    "timer": "Timer",
+    "customMinutes": "Durata proposta per «Altro…»",
+    "breakAfter": "Suggerisci una pausa dopo",
+    "minutesOfFocus": "minuti di focus",
+    "minutes": "minuti",
+    "night": "Notte",
+    "nightFrom": "Buonanotte dalle",
+    "nightTo": "alle"
   }
 }

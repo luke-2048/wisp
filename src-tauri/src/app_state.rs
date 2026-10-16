@@ -1,6 +1,6 @@
-//! The app's live state: keeps the facts (task, timer, flags), asks the core
-//! state machine which state Wisp is in, and tells the frontend whenever
-//! something changes.
+//! The app's live state: keeps the facts (task, timer, ideas, settings), asks
+//! the core state machine which state Wisp is in, tells the frontend whenever
+//! something changes, and saves every change to the local database.
 
 use std::{
     sync::{Mutex, MutexGuard},
@@ -8,17 +8,19 @@ use std::{
     time::{Duration, Instant},
 };
 
-use chrono::{DateTime, Local};
+use chrono::Local;
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, Manager, State};
 use wisp_core::{
     ideas::{Ideas, ParkedIdea},
-    models::WispState,
+    models::{Settings, WispState},
     state_machine::{self, DONE_DURATION, StateInput, StateRules},
     timer::{FocusTimer, TimerEvent, TimerStatus},
 };
 
-/// Event carrying a fresh `Snapshot` to the frontend.
+use crate::db::{Db, FocusSession};
+
+/// Event carrying a fresh `Snapshot` to every window.
 const STATE_EVENT: &str = "wisp://state";
 
 /// The timer and the time-based rules are re-checked this often.
@@ -30,6 +32,9 @@ const MAX_TASK_CHARS: usize = 200;
 /// Shortest and longest timer the user can start, in minutes.
 const TIMER_MINUTES: std::ops::RangeInclusive<u32> = 1..=240;
 
+/// The database file, inside the app's data folder.
+const DB_FILE: &str = "wisp.sqlite3";
+
 /// Everything the frontend needs to draw.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct Snapshot {
@@ -39,6 +44,7 @@ pub struct Snapshot {
     /// Newest first.
     pub ideas: Vec<ParkedIdea>,
     pub unseen_ideas: usize,
+    pub settings: Settings,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -49,21 +55,24 @@ pub struct TimerSnapshot {
     pub total_ms: u64,
 }
 
-/// A task marked "Fatto". Kept in memory for now; step 6 saves it to SQLite.
-#[allow(dead_code)] // read when persistence arrives (step 6)
-struct DoneTask {
-    title: String,
-    done_at: DateTime<Local>,
+/// The timer run in progress, saved as a focus session when it ends.
+struct SessionStart {
+    started_ms: i64,
+    planned_ms: i64,
 }
 
 #[derive(Default)]
 struct Inner {
     input: StateInput,
     rules: StateRules,
+    settings: Settings,
     task: Option<String>,
     timer: FocusTimer,
-    done_today: Vec<DoneTask>,
+    session: Option<SessionStart>,
     ideas: Ideas,
+    /// `None` if the database could not be opened: Wisp still works, it just
+    /// forgets everything when it quits.
+    db: Option<Db>,
     /// The last snapshot sent, so we only emit real changes.
     sent: Option<Snapshot>,
 }
@@ -73,6 +82,7 @@ impl Inner {
     fn update(&mut self, now: Instant) {
         if self.timer.tick(now) == Some(TimerEvent::Finished) {
             self.input.waiting = true;
+            self.end_session(true);
         }
         self.input.focus_streak = self.timer.focus_streak(now);
     }
@@ -88,7 +98,32 @@ impl Inner {
             },
             ideas: self.ideas.newest_first(),
             unseen_ideas: self.ideas.unseen_count(),
+            settings: self.settings.clone(),
         }
+    }
+
+    /// Saves the timer run that just ended (if any) as a focus session.
+    fn end_session(&mut self, completed: bool) {
+        if let Some(start) = self.session.take() {
+            let session = FocusSession {
+                started_ms: start.started_ms,
+                ended_ms: now_ms(),
+                planned_ms: start.planned_ms,
+                completed,
+            };
+            save(&mut self.db, "focus session", |db| {
+                db.save_session(&session)
+            });
+        }
+    }
+}
+
+/// Writes to the database if it is open; a failure is logged, never fatal.
+fn save(db: &mut Option<Db>, what: &str, write: impl FnOnce(&mut Db) -> rusqlite::Result<()>) {
+    if let Some(db) = db
+        && let Err(error) = write(db)
+    {
+        eprintln!("could not save the {what}: {error}");
     }
 }
 
@@ -96,7 +131,12 @@ fn millis(duration: Duration) -> u64 {
     u64::try_from(duration.as_millis()).unwrap_or(u64::MAX)
 }
 
-/// Shared by the tray, the island and the frontend commands, behind a lock.
+/// Wall-clock time for the database, in milliseconds since 1970.
+fn now_ms() -> i64 {
+    Local::now().timestamp_millis()
+}
+
+/// Shared by the tray, the windows and the frontend commands, behind a lock.
 #[derive(Default)]
 pub struct AppState(Mutex<Inner>);
 
@@ -106,6 +146,31 @@ impl AppState {
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
+}
+
+/// Opens the database and brings back settings, current task and ideas.
+/// Called once at startup, before anything reads the settings.
+pub fn load(app: &AppHandle) {
+    let db = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())
+        .and_then(|folder| Db::open(&folder.join(DB_FILE)).map_err(|error| error.to_string()));
+    let db = match db {
+        Ok(db) => db,
+        Err(error) => {
+            eprintln!("could not open the database, nothing will be saved: {error}");
+            return;
+        }
+    };
+    change(app, |inner, _| {
+        let settings = db.load_settings().unwrap_or_default();
+        inner.rules = StateRules::from(&settings);
+        inner.settings = settings;
+        inner.task = db.current_task().unwrap_or_default();
+        inner.ideas = Ideas::from_saved(db.load_ideas().unwrap_or_default());
+        inner.db = Some(db);
+    });
 }
 
 /// Starts the 1 s tick: timer end, end of "Fatto!", night.
@@ -130,6 +195,19 @@ fn change(app: &AppHandle, apply: impl FnOnce(&mut Inner, Instant)) {
     refresh(app);
 }
 
+pub fn settings(app: &AppHandle) -> Settings {
+    app.state::<AppState>().lock().settings.clone()
+}
+
+/// New settings from the settings window, already checked by the caller.
+pub fn apply_settings(app: &AppHandle, settings: Settings) {
+    change(app, |inner, _| {
+        save(&mut inner.db, "settings", |db| db.save_settings(&settings));
+        inner.rules = StateRules::from(&settings);
+        inner.settings = settings;
+    });
+}
+
 /// Debug menu: `Some(state)` forces a state, `None` goes back to automatic.
 // Only the debug menu calls it for now.
 #[cfg_attr(not(debug_assertions), allow(dead_code))]
@@ -144,32 +222,40 @@ pub fn island_seen(app: &AppHandle) {
 
 pub fn set_task(app: &AppHandle, text: &str) {
     let title: String = text.trim().chars().take(MAX_TASK_CHARS).collect();
+    let title = (!title.is_empty()).then_some(title);
     change(app, |inner, _| {
-        inner.task = (!title.is_empty()).then_some(title);
+        save(&mut inner.db, "task", |db| {
+            db.set_current_task(title.as_deref(), now_ms())
+        });
+        inner.task = title;
     });
 }
 
-/// "Fatto": Wisp celebrates, the task goes to today's list, the field empties
+/// "Fatto": Wisp celebrates, the task goes to the history, the field empties
 /// and the timer stops, ready for the next task.
 pub fn task_done(app: &AppHandle) {
     change(app, |inner, now| {
-        if let Some(title) = inner.task.take() {
-            inner.done_today.push(DoneTask {
-                title,
-                done_at: Local::now(),
+        if inner.task.take().is_some() {
+            save(&mut inner.db, "finished task", |db| {
+                db.complete_current_task(now_ms())
             });
             inner.input.done_until = Some(now + DONE_DURATION);
             inner.timer.stop(now);
+            inner.end_session(false);
         }
     });
 }
 
 pub fn timer_start(app: &AppHandle, minutes: u32) {
     let minutes = minutes.clamp(*TIMER_MINUTES.start(), *TIMER_MINUTES.end());
+    let duration = Duration::from_secs(u64::from(minutes) * 60);
     change(app, |inner, now| {
-        inner
-            .timer
-            .start(Duration::from_secs(u64::from(minutes) * 60), now);
+        inner.end_session(false); // a timer replaced before its end
+        inner.timer.start(duration, now);
+        inner.session = Some(SessionStart {
+            started_ms: now_ms(),
+            planned_ms: i64::try_from(duration.as_millis()).unwrap_or(i64::MAX),
+        });
         inner.input.waiting = false;
     });
 }
@@ -183,21 +269,32 @@ pub fn timer_resume(app: &AppHandle) {
 }
 
 pub fn timer_stop(app: &AppHandle) {
-    change(app, |inner, now| inner.timer.stop(now));
+    change(app, |inner, now| {
+        inner.timer.stop(now);
+        inner.end_session(false);
+    });
 }
 
 pub fn park_idea(app: &AppHandle, text: &str) {
     change(app, |inner, _| {
-        inner.ideas.park(text, Local::now().timestamp_millis());
+        if let Some(idea) = inner.ideas.park(text, now_ms()) {
+            save(&mut inner.db, "idea", |db| db.insert_idea(&idea));
+        }
     });
 }
 
 pub fn idea_seen(app: &AppHandle, id: u64) {
-    change(app, |inner, _| inner.ideas.mark_seen(id));
+    change(app, |inner, _| {
+        inner.ideas.mark_seen(id);
+        save(&mut inner.db, "idea", |db| db.mark_idea_seen(id));
+    });
 }
 
 pub fn idea_delete(app: &AppHandle, id: u64) {
-    change(app, |inner, _| inner.ideas.delete(id));
+    change(app, |inner, _| {
+        inner.ideas.delete(id);
+        save(&mut inner.db, "idea", |db| db.delete_idea(id));
+    });
 }
 
 /// Re-evaluates and emits `wisp://state` if anything changed. While the timer
@@ -225,8 +322,8 @@ pub fn refresh(app: &AppHandle) {
     }
 }
 
-/// The frontend asks for the current snapshot once when it loads; after that
-/// it just listens to `wisp://state`.
+/// A window asks for the current snapshot once when it loads; after that it
+/// just listens to `wisp://state`.
 #[tauri::command]
 pub fn current_snapshot(state: State<'_, AppState>) -> Snapshot {
     let mut inner = state.lock();

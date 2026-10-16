@@ -14,8 +14,8 @@ import { playDone, playTimerEnd } from './sounds';
 // - `wisp://state` carries Wisp's state, the task and the timer.
 // Between two snapshots the countdown runs on the local clock, only to keep
 // the numbers moving; when the timer ends is decided in Rust.
-// The palette is fixed to Lilla until settings arrive (step 6).
-const palette = palettes.lilla;
+// The palette comes from the settings, inside every snapshot.
+let palette = palettes.lilla;
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (app) {
@@ -63,6 +63,8 @@ if (app) {
   let previous: WispState | null = null;
 
   const show = (snapshot: Snapshot) => {
+    palette = palettes[snapshot.settings.palette];
+    island.style.setProperty('--palette-base', palette.base);
     for (const svg of wisps) {
       applyState(svg, snapshot.state, palette);
     }

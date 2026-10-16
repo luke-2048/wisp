@@ -1,15 +1,15 @@
-import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { palettes } from '../character/colors';
 import { applyState, renderWisp } from '../character/wisp';
 import { it } from '../i18n/it';
+import type { Snapshot } from '../island/snapshot';
 import './park.css';
 
 // The park window: one field. Enter keeps the idea, Esc throws it away; in
 // both cases Rust hides the window and gives the focus back to the app the
 // user was working in.
-const palette = palettes.lilla;
 
 const app = document.querySelector<HTMLDivElement>('#app');
 if (app) {
@@ -21,7 +21,14 @@ if (app) {
       <span class="hint">${it.park.hint} ↵</span>
     </div>`;
 
-  applyState(app.querySelector<SVGSVGElement>('svg.wisp')!, 'focused', palette);
+  // The icon follows the palette chosen in the settings.
+  const icon = app.querySelector<SVGSVGElement>('svg.wisp')!;
+  const paint = (snapshot: Snapshot) =>
+    applyState(icon, 'focused', palettes[snapshot.settings.palette]);
+  applyState(icon, 'focused', palettes.lilla);
+  void invoke<Snapshot>('current_snapshot').then(paint);
+  void listen<Snapshot>('wisp://state', (event) => paint(event.payload));
+
   const field = app.querySelector<HTMLInputElement>('.field')!;
 
   field.addEventListener('keydown', (event) => {

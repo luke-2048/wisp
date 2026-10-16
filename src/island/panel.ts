@@ -5,6 +5,7 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { it } from '../i18n/it';
+import { shortcutLabel } from '../shared/shortcut';
 import { ideasHtml, setupIdeas } from './ideas';
 import type { Snapshot } from './snapshot';
 
@@ -39,7 +40,7 @@ export function panelHtml(): string {
       </div>
       <button class="ideas-link">
         <span class="ideas-count">${it.ideas.none}</span>
-        <span class="ideas-hint">· ${it.ideas.hint}</span>
+        <span class="ideas-hint"></span>
       </button>
     </div>
     ${ideasHtml()}
@@ -63,6 +64,7 @@ export function setupPanel(root: HTMLElement): Panel {
   const done = q<HTMLButtonElement>('.done');
   const side = q<HTMLDivElement>('.side');
   const ideasCount = q<HTMLSpanElement>('.ideas-count');
+  const ideasHint = q<HTMLSpanElement>('.ideas-hint');
 
   const showView = (view: 'main' | 'ideas') => (side.dataset.view = view);
   q('.ideas-link').addEventListener('click', () => showView('ideas'));
@@ -107,8 +109,9 @@ export function setupPanel(root: HTMLElement): Panel {
   other.addEventListener('click', () => {
     other.hidden = true;
     custom.hidden = false;
-    custom.value = '';
+    custom.value = String(current?.settings.custom_minutes ?? '');
     custom.focus();
+    custom.select();
   });
   custom.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && Number(custom.value) >= 1) {
@@ -141,6 +144,10 @@ export function setupPanel(root: HTMLElement): Panel {
       task.classList.toggle('placeholder', snapshot.task === null);
       done.disabled = snapshot.task === null;
       ideasCount.textContent = countText(snapshot);
+      ideasHint.textContent = `· ${it.ideas.hint.replace(
+        '{shortcut}',
+        shortcutLabel(snapshot.settings.park_shortcut),
+      )}`;
       drawIdeas(snapshot.ideas);
     },
     reset() {

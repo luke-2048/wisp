@@ -1,3 +1,4 @@
+import type { PaletteName } from '../character/colors';
 import type { WispState } from '../character/states';
 
 // What the backend sends in `wisp://state` (Snapshot in src-tauri/src/app_state.rs).
@@ -15,6 +16,17 @@ export interface Snapshot {
   /** Newest first. */
   ideas: ParkedIdea[];
   unseen_ideas: number;
+  settings: Settings;
+}
+
+/** Settings in src-tauri (wisp_core::models::Settings). */
+export interface Settings {
+  palette: PaletteName;
+  park_shortcut: string;
+  custom_minutes: number;
+  break_after_minutes: number;
+  night_start: string;
+  night_end: string;
 }
 
 export interface ParkedIdea {

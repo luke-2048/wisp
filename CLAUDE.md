@@ -52,6 +52,15 @@ local.
   and glows softly (`.attention`) only when it has something to say (waiting, break,
   done). Step 3 (hover) was done before step 2 (states).
 - Default palette Lilla; Menta and Pesca selectable in settings.
+- The island is **always top centre** (owner's rule): no "bottom right" position setting,
+  although the brief mentions one.
+- Settings are saved on every change (no Save button); Rust sanitises them
+  (`Settings::sanitized`) and stores one row per field in `settings` (JSON values), so new
+  fields just get their default. The park shortcut uses Tauri accelerator syntax with
+  `CommandOrControl`, which the macOS version will read as Cmd.
+- Data lives in `%APPDATA%pp.wisp.focus\wisp.sqlite3`; migrations in
+  `src-tauri/src/db/migrations.rs` are append-only. A running timer is not restored after
+  a restart (on purpose); task, ideas and settings are.
 - Debug-forced state stays until "Automatico" is chosen in the debug submenu.
 
 ## Conventions

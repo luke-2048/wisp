@@ -8,7 +8,7 @@ use std::time::{Duration, Instant};
 
 use chrono::NaiveTime;
 
-use crate::models::WispState;
+use crate::models::{Settings, WispState, parse_time};
 
 /// How long Wisp celebrates after "Fatto".
 pub const DONE_DURATION: Duration = Duration::from_secs(4);
@@ -42,6 +42,18 @@ impl Default for StateRules {
             // `expect` is fine here: these are fixed, valid times.
             night_start: NaiveTime::from_hms_opt(23, 0, 0).expect("valid time"),
             night_end: NaiveTime::from_hms_opt(5, 0, 0).expect("valid time"),
+        }
+    }
+}
+
+impl From<&Settings> for StateRules {
+    /// The user's settings as thresholds; unreadable times keep the defaults.
+    fn from(settings: &Settings) -> Self {
+        let defaults = StateRules::default();
+        Self {
+            break_after: Duration::from_secs(u64::from(settings.break_after_minutes) * 60),
+            night_start: parse_time(&settings.night_start).unwrap_or(defaults.night_start),
+            night_end: parse_time(&settings.night_end).unwrap_or(defaults.night_end),
         }
     }
 }
@@ -176,6 +188,20 @@ mod tests {
         input.waiting = false;
         assert_eq!(evaluate(&input, &rules, now, midnight), WispState::Night);
         assert_eq!(evaluate(&input, &rules, now, at(10, 0)), WispState::Break);
+    }
+
+    #[test]
+    fn rules_follow_the_settings() {
+        let settings = Settings {
+            break_after_minutes: 45,
+            night_start: "21:30".into(),
+            night_end: "06:00".into(),
+            ..Settings::default()
+        };
+        let rules = StateRules::from(&settings);
+        assert_eq!(rules.break_after, minutes(45));
+        assert_eq!(rules.night_start, at(21, 30));
+        assert_eq!(rules.night_end, at(6, 0));
     }
 
     #[test]

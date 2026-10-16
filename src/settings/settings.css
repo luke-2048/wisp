@@ -1,0 +1,156 @@
+/* A normal window, in Wisp's dark colours. */
+:root {
+  color-scheme: dark;
+  --text: #e9e6ef;
+  --muted: #8c8796;
+  --line: #24212a;
+  --field: #1f1d24;
+  --accent: #dcd5fb;
+}
+
+html,
+body {
+  margin: 0;
+  background: #121115;
+  color: var(--text);
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+  user-select: none;
+}
+
+#app {
+  padding: 20px 24px 16px;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.logo {
+  width: 34px;
+  height: 34px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+section {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+h2 {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+}
+
+.row + .row {
+  margin-top: 6px;
+}
+
+.field-label {
+  color: var(--text);
+}
+
+.help {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.help.error {
+  color: #ffb3bb;
+}
+
+button,
+input {
+  font: inherit;
+  color: var(--text);
+}
+
+.palettes {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.palette {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--field);
+  cursor: pointer;
+}
+
+.palette.chosen {
+  border-color: var(--accent);
+}
+
+.swatch {
+  width: 38px;
+  height: 38px;
+}
+
+.shortcut {
+  min-width: 150px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+  cursor: pointer;
+}
+
+.shortcut.recording {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.number,
+.time {
+  height: 28px;
+  box-sizing: border-box;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field);
+}
+
+.number {
+  width: 64px;
+}
+
+input:focus,
+button:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 0;
+}
+
+footer {
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}

@@ -1,11 +1,11 @@
-//! The park window: a small field in the middle of the screen, opened with
-//! Ctrl+Shift+Space from any app, to write an idea down and get straight back
+//! The park window: a small field in the middle of the screen, opened with a
+//! global shortcut (Ctrl+Shift+Space by default) from any app, to write an idea down and get straight back
 //! to the window you were working in.
 
 use std::sync::{Mutex, MutexGuard};
 
 use tauri::{AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, WebviewWindow};
-use tauri_plugin_global_shortcut::{GlobalShortcutExt, ShortcutEvent, ShortcutState};
+use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut, ShortcutEvent, ShortcutState};
 
 use crate::{
     app_state,
@@ -14,9 +14,6 @@ use crate::{
 
 /// Window label, as declared in `tauri.conf.json`.
 pub const LABEL: &str = "park";
-
-/// Becomes configurable in the settings (step 6).
-const SHORTCUT: &str = "ctrl+shift+space";
 
 /// The field plus room for its shadow. Must match `src/park/park.css`.
 const SIZE: LogicalSize<f64> = LogicalSize {
@@ -39,12 +36,27 @@ fn previous(app: &AppHandle) -> MutexGuard<'_, Option<ForeignWindow>> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-/// Registers Ctrl+Shift+Space. If another app already owns it, Wisp still
-/// starts; the shortcut just does nothing (the settings will allow another).
+/// Registers the shortcut from the settings (Ctrl+Shift+Space by default).
+/// If another app already owns it, Wisp still starts; the user can pick
+/// another one in the settings.
 pub fn register_shortcut(app: &AppHandle) {
-    if let Err(error) = app.global_shortcut().register(SHORTCUT) {
-        eprintln!("could not register {SHORTCUT}: {error}");
+    let shortcut = app_state::settings(app).park_shortcut;
+    if let Err(error) = app.global_shortcut().register(shortcut.as_str()) {
+        eprintln!("could not register {shortcut}: {error}");
     }
+}
+
+/// Swaps the shortcut. On failure the old one stays active and the error code
+/// ("invalid" or "taken") tells the settings window what to say.
+pub fn change_shortcut(app: &AppHandle, old: &str, new: &str) -> Result<(), &'static str> {
+    let new: Shortcut = new.parse().map_err(|_| "invalid")?;
+    let shortcuts = app.global_shortcut();
+    let _ = shortcuts.unregister(old);
+    if shortcuts.register(new).is_err() {
+        let _ = shortcuts.register(old);
+        return Err("taken");
+    }
+    Ok(())
 }
 
 pub fn on_shortcut(app: &AppHandle, event: ShortcutEvent) {

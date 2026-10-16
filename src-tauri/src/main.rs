@@ -3,10 +3,12 @@
 
 mod app_state;
 mod commands;
+mod db;
 mod i18n;
 mod island;
 mod park;
 mod platform;
+mod settings_window;
 mod tray;
 
 use tauri::{Manager, WindowEvent};
@@ -41,8 +43,11 @@ fn main() {
             commands::park_cancel,
             commands::idea_seen,
             commands::idea_delete,
+            commands::update_settings,
         ])
         .setup(|app| {
+            // First: everything else reads the saved settings.
+            app_state::load(app.handle());
             island::setup(app.handle())?;
             tray::create(app.handle())?;
             park::register_shortcut(app.handle());
@@ -59,6 +64,9 @@ fn main() {
             // The user clicked away from the park window: hide it.
             WindowEvent::Focused(false) if window.label() == park::LABEL => {
                 park::dismiss(window.app_handle());
+            }
+            WindowEvent::CloseRequested { api, .. } if window.label() == settings_window::LABEL => {
+                settings_window::hide_instead_of_closing(window, api);
             }
             _ => {}
         })

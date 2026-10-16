@@ -27,20 +27,28 @@ impl Ideas {
         Self::default()
     }
 
-    /// Parks an idea. Blank text is ignored; returns whether it was kept.
-    pub fn park(&mut self, text: &str, created_ms: i64) -> bool {
+    /// The ideas saved last time, oldest first. New ids continue after theirs.
+    pub fn from_saved(items: Vec<ParkedIdea>) -> Self {
+        let next_id = items.iter().map(|idea| idea.id).max().unwrap_or(0);
+        Self { items, next_id }
+    }
+
+    /// Parks an idea and returns it (so the caller can save it). Blank text
+    /// is ignored and gives `None`.
+    pub fn park(&mut self, text: &str, created_ms: i64) -> Option<ParkedIdea> {
         let text: String = text.trim().chars().take(MAX_IDEA_CHARS).collect();
         if text.is_empty() {
-            return false;
+            return None;
         }
         self.next_id += 1;
-        self.items.push(ParkedIdea {
+        let idea = ParkedIdea {
             id: self.next_id,
             text,
             created_ms,
             seen: false,
-        });
-        true
+        };
+        self.items.push(idea.clone());
+        Some(idea)
     }
 
     pub fn mark_seen(&mut self, id: u64) {
@@ -71,8 +79,8 @@ mod tests {
     #[test]
     fn parks_trimmed_text_and_ignores_blank_ideas() {
         let mut ideas = Ideas::new();
-        assert!(ideas.park("  call the dentist \n", 1_000));
-        assert!(!ideas.park("   ", 2_000));
+        assert!(ideas.park("  call the dentist \n", 1_000).is_some());
+        assert!(ideas.park("   ", 2_000).is_none());
         let list = ideas.newest_first();
         assert_eq!(list.len(), 1);
         assert_eq!(list[0].text, "call the dentist");
@@ -103,6 +111,20 @@ mod tests {
         assert_eq!(ideas.newest_first().len(), 1);
         ideas.mark_seen(999); // unknown id: nothing happens
         ideas.delete(999);
+        assert_eq!(ideas.unseen_count(), 1);
+    }
+
+    #[test]
+    fn saved_ideas_come_back_and_new_ids_do_not_clash() {
+        let saved = vec![ParkedIdea {
+            id: 7,
+            text: "old".into(),
+            created_ms: 1,
+            seen: true,
+        }];
+        let mut ideas = Ideas::from_saved(saved);
+        let new = ideas.park("new", 2).unwrap();
+        assert_eq!(new.id, 8);
         assert_eq!(ideas.unseen_count(), 1);
     }
 

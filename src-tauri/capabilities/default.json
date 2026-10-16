@@ -4,7 +4,8 @@
   "description": "Permissions for Wisp's windows",
   "windows": [
     "island",
-    "park"
+    "park",
+    "settings"
   ],
   "permissions": [
     "core:default"

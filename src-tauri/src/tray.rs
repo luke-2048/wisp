@@ -7,7 +7,7 @@ use tauri::{
 };
 use tauri_plugin_autostart::ManagerExt;
 
-use crate::{i18n, island};
+use crate::{i18n, island, settings_window};
 
 // Menu item ids: they tell us which item was clicked.
 const SHOW_HIDE: &str = "show_hide";
@@ -20,8 +20,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let autostart_on = app.autolaunch().is_enabled().unwrap_or(false);
 
     let show_hide = MenuItem::with_id(app, SHOW_HIDE, &text.tray.show_hide, true, None::<&str>)?;
-    // Disabled until the settings window exists (step 6).
-    let settings = MenuItem::with_id(app, SETTINGS, &text.tray.settings, false, None::<&str>)?;
+    let settings = MenuItem::with_id(app, SETTINGS, &text.tray.settings, true, None::<&str>)?;
     let autostart = CheckMenuItem::with_id(
         app,
         AUTOSTART,
@@ -68,6 +67,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
 fn on_menu_event(app: &AppHandle, event: &MenuEvent, autostart: &CheckMenuItem<Wry>) {
     let result = match event.id().as_ref() {
         SHOW_HIDE => island::toggle(app),
+        SETTINGS => settings_window::open(app),
         AUTOSTART => {
             toggle_autostart(app, autostart);
             Ok(())

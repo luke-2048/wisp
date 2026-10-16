@@ -18,6 +18,7 @@ export default defineConfig({
       input: {
         island: resolve(import.meta.dirname, 'island.html'),
         park: resolve(import.meta.dirname, 'park.html'),
+        settings: resolve(import.meta.dirname, 'settings.html'),
       },
     },
   },
