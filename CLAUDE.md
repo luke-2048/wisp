@@ -31,8 +31,9 @@ local.
 - `break` triggers after 90 min of cumulative running timer; only a pause/stop lasting at
   least 5 min resets the count.
 - `night` runs from 23:00 to 05:00 (both configurable).
-- Closed island: click-through window + cursor polling from Rust; on hover the window
-  grows to the open size at once and CSS animates the panel.
+- Island window: always 580x266 and never resized (resizing a WebView mid-animation drops
+  frames); closed = click-through, Rust polls the cursor every 20 ms; on hover clicks are
+  re-enabled and CSS animates the black shape (spring open, smooth close).
 - Closed island is only the 240x30 bar (owner's choice, overrides the brief's "Wisp peeks
   from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp blinks
   and glows softly (`.attention`) only when it has something to say (waiting, break,

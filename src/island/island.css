@@ -1,5 +1,16 @@
 /* The window is transparent: only what we paint here is visible.
-   Rust sizes the window: 240x30 closed, 580x266 open (panel + shadow room). */
+   It is always 580x266 (panel + shadow room) and is never resized, so the
+   animations below run without the WebView having to rebuild its surface.
+   When closed, Rust makes the whole window let clicks through. */
+:root {
+  /* Open: a gentle spring with a hint of overshoot. Close: a smooth settle.
+     CLOSE_MS must match CLOSE_ANIMATION in crates/wisp-core/src/hover.rs. */
+  --open-ease: cubic-bezier(0.32, 1.22, 0.52, 1);
+  --close-ease: cubic-bezier(0.45, 0, 0.2, 1);
+  --open-ms: 460ms;
+  --close-ms: 340ms;
+}
+
 html,
 body {
   margin: 0;
@@ -24,11 +35,14 @@ body {
   background: #000;
   border-radius: 0 0 14px 14px;
   overflow: hidden;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  /* The transition used is the one of the state we are going to: this one
+     plays when closing. */
   transition:
-    width 250ms ease,
-    height 250ms ease,
-    border-radius 250ms ease,
-    box-shadow 250ms ease;
+    width var(--close-ms) var(--close-ease),
+    height var(--close-ms) var(--close-ease),
+    border-radius var(--close-ms) var(--close-ease),
+    box-shadow var(--close-ms) var(--close-ease);
 }
 
 .island.open .shape {
@@ -36,30 +50,41 @@ body {
   height: 236px;
   border-radius: 0 0 30px 30px;
   box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+  transition:
+    width var(--open-ms) var(--open-ease),
+    height var(--open-ms) var(--open-ease),
+    border-radius var(--open-ms) var(--open-ease),
+    box-shadow var(--open-ms) ease-out;
 }
 
 /* ---- Closed bar ---- */
 
+/* Fixed width and centred, so it does not stretch while the shape grows. */
 .bar {
   position: absolute;
-  inset: 0 0 auto 0;
+  top: 0;
+  left: 50%;
+  width: 240px;
   height: 30px;
+  box-sizing: border-box;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 14px 0 12px;
-  transition: opacity 120ms ease;
+  /* Closing: comes back once the shape is almost a bar again. */
+  transition: opacity 180ms ease-out 200ms;
 }
 
 .island.open .bar {
   opacity: 0;
+  transition: opacity 90ms ease-in;
 }
 
 .mini {
   display: block;
   width: 24px;
   height: 24px;
-  border-radius: 50%;
 }
 
 /* Wisp has something to say (timer over, break, done): a soft, slow glow.
@@ -96,9 +121,12 @@ body {
 
 /* ---- Open panel ---- */
 
+/* Centred like the bar; slides and fades in once the shape has room for it.
+   Only opacity and transform animate here: the GPU handles those alone. */
 .panel {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 50%;
   width: 540px;
   height: 236px;
   box-sizing: border-box;
@@ -107,12 +135,19 @@ body {
   align-items: center;
   gap: 24px;
   opacity: 0;
-  transition: opacity 100ms ease;
+  transform: translate(-50%, -10px) scale(0.96);
+  transform-origin: 50% 0;
+  transition:
+    opacity 120ms ease-in,
+    transform 160ms ease-in;
 }
 
 .island.open .panel {
   opacity: 1;
-  transition: opacity 160ms ease 110ms;
+  transform: translate(-50%, 0) scale(1);
+  transition:
+    opacity 260ms ease-out 140ms,
+    transform 380ms var(--open-ease) 100ms;
 }
 
 .full {
@@ -191,8 +226,11 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .shape,
+  .island.open .shape,
   .bar,
+  .island.open .bar,
   .panel,
+  .island.open .panel,
   .wisp-eyes {
     transition: none;
   }

@@ -8,17 +8,18 @@ use std::time::{Duration, Instant};
 /// How long the cursor must stay away before the island closes.
 pub const CLOSE_DELAY: Duration = Duration::from_millis(600);
 
-/// Length of the CSS closing animation; the window shrinks only after it.
-pub const CLOSE_ANIMATION: Duration = Duration::from_millis(250);
+/// Length of the CSS closing animation (`src/island/island.css`); clicks start
+/// passing through again only after it.
+pub const CLOSE_ANIMATION: Duration = Duration::from_millis(340);
 
 /// What the window should do after an update.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum HoverAction {
-    /// Grow the window to the open size at once and start the opening animation.
+    /// Stop letting clicks through and start the opening animation.
     Expand,
-    /// Start the closing animation; the window keeps its open size for now.
+    /// Start the closing animation.
     Collapse,
-    /// The animation is over: shrink the window and let clicks pass through again.
+    /// The animation is over: let clicks pass through again.
     Shrink,
 }
 
@@ -46,7 +47,7 @@ impl HoverTracker {
         Self::default()
     }
 
-    /// True while the window has (or keeps) its open size.
+    /// True while the island is open or still playing its closing animation.
     pub fn is_expanded(&self) -> bool {
         self.phase != Phase::Closed
     }
@@ -152,11 +153,9 @@ mod tests {
             Some(HoverAction::Collapse)
         );
         assert!(tracker.is_expanded());
-        assert_eq!(tracker.update(false, t0 + ms(900)), None);
-        assert_eq!(
-            tracker.update(false, t0 + ms(950)),
-            Some(HoverAction::Shrink)
-        );
+        let shrink_at = t0 + ms(700) + CLOSE_ANIMATION;
+        assert_eq!(tracker.update(false, shrink_at - ms(1)), None);
+        assert_eq!(tracker.update(false, shrink_at), Some(HoverAction::Shrink));
         assert!(!tracker.is_expanded());
     }
 

@@ -8,7 +8,8 @@ use std::{
 
 use serde::Serialize;
 use tauri::{
-    AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, PhysicalRect, WebviewWindow,
+    AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, PhysicalRect, PhysicalSize,
+    WebviewWindow,
 };
 use wisp_core::hover::{HoverAction, HoverTracker};
 
@@ -17,28 +18,30 @@ use crate::platform::{self, Platform};
 /// Window label, as declared in `tauri.conf.json`.
 const LABEL: &str = "island";
 
-/// Closed: just the black bar. Sizes are logical pixels, i.e. before
-/// Windows' display scaling.
-const CLOSED_SIZE: LogicalSize<f64> = LogicalSize {
-    width: 240.0,
-    height: 30.0,
-};
-
-/// Open: the 540x236 panel plus room for its soft shadow (20 px on each side,
-/// 30 px below). Must match `.island.open` in `src/island/island.css`.
-const OPEN_SIZE: LogicalSize<f64> = LogicalSize {
+/// The window always has the open size: the 540x236 panel plus room for its
+/// soft shadow. Resizing a WebView mid-animation drops frames, so we never do
+/// it; when closed the transparent window simply lets every click through.
+/// Sizes are logical pixels (before Windows' display scaling) and must match
+/// `src/island/island.css`.
+const WINDOW_SIZE: LogicalSize<f64> = LogicalSize {
     width: 580.0,
     height: 266.0,
 };
-const PANEL_MARGIN_X: f64 = 20.0;
-const PANEL_HEIGHT: f64 = 236.0;
+const BAR_SIZE: LogicalSize<f64> = LogicalSize {
+    width: 240.0,
+    height: 30.0,
+};
+const PANEL_SIZE: LogicalSize<f64> = LogicalSize {
+    width: 540.0,
+    height: 236.0,
+};
 
 /// How often we look at the cursor.
-const POLL_INTERVAL: Duration = Duration::from_millis(50);
+const POLL_INTERVAL: Duration = Duration::from_millis(20);
 
 /// Every this many polls (2 s) we also check whether the primary monitor, its
 /// resolution or its scale changed. Windows has no single event for all three.
-const POLLS_PER_MONITOR_CHECK: u32 = 40;
+const POLLS_PER_MONITOR_CHECK: u32 = 100;
 
 /// Event telling the frontend to play the open/close animation.
 const ISLAND_EVENT: &str = "wisp://island";
@@ -59,7 +62,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let window = island_window(app)?;
     // Closed, clicks go straight through to the window underneath.
     platform::current().set_click_through(&window, true)?;
-    place(&window, is_expanded(app))?;
+    place(&window)?;
     window.show()?;
     start_polling(app.clone());
     Ok(())
@@ -67,7 +70,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
 
 /// Puts the island back where it belongs, now.
 pub fn reposition(app: &AppHandle) -> tauri::Result<()> {
-    place(&island_window(app)?, is_expanded(app))
+    place(&island_window(app)?)
 }
 
 /// Tray "Mostra/Nascondi".
@@ -83,7 +86,7 @@ pub fn toggle(app: &AppHandle) -> tauri::Result<()> {
 /// Shows the island (also used when the user launches Wisp a second time).
 pub fn show(app: &AppHandle) -> tauri::Result<()> {
     let window = island_window(app)?;
-    place(&window, is_expanded(app))?;
+    place(&window)?;
     window.show()
 }
 
@@ -104,18 +107,13 @@ fn tracker(app: &AppHandle) -> std::sync::MutexGuard<'_, HoverTracker> {
         .unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 
-fn is_expanded(app: &AppHandle) -> bool {
-    tracker(app).is_expanded()
-}
-
-/// Sizes the island for the primary monitor's scale and moves it to the spot
+/// Sizes the window for the primary monitor's scale and moves it to the spot
 /// the platform chooses. Does nothing if it is already right.
-fn place(window: &WebviewWindow, expanded: bool) -> tauri::Result<()> {
+fn place(window: &WebviewWindow) -> tauri::Result<()> {
     let Some(monitor) = window.primary_monitor()? else {
         return Ok(()); // no monitor (e.g. during a display switch): try again later
     };
-    let logical = if expanded { OPEN_SIZE } else { CLOSED_SIZE };
-    let size = logical.to_physical::<u32>(monitor.scale_factor());
+    let size = WINDOW_SIZE.to_physical::<u32>(monitor.scale_factor());
     let area = PhysicalRect {
         position: *monitor.position(),
         size: *monitor.size(),
@@ -160,20 +158,26 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
     }
     let cursor = app.cursor_position()?;
     let scale = window.scale_factor()?;
-    let origin = window.outer_position()?;
-    let size = window.outer_size()?;
+    let window_area = PhysicalRect {
+        position: window.outer_position()?,
+        size: window.outer_size()?,
+    };
 
     // The braces limit how long we hold the lock: it is released at `}`,
     // before we touch the window.
     let action = {
         let mut tracker = tracker(app);
-        let zone = hover_zone(origin, size, scale, tracker.is_expanded());
+        let shape = if tracker.is_expanded() {
+            PANEL_SIZE
+        } else {
+            BAR_SIZE
+        };
+        let zone = Zone::top_centre(window_area, shape.to_physical(scale));
         tracker.update(zone.contains(cursor), Instant::now())
     };
 
     match action {
         Some(HoverAction::Expand) => {
-            place(&window, true)?;
             platform::current().set_click_through(&window, false)?;
             app.emit(ISLAND_EVENT, IslandEvent { open: true })?;
         }
@@ -182,40 +186,14 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
         }
         Some(HoverAction::Shrink) => {
             platform::current().set_click_through(&window, true)?;
-            place(&window, false)?;
         }
         None => {}
     }
     Ok(())
 }
 
-/// The area that counts as "over the island", in physical pixels: the whole
-/// window when closed, only the black panel (not its shadow) when open.
-fn hover_zone(
-    origin: PhysicalPosition<i32>,
-    size: tauri::PhysicalSize<u32>,
-    scale: f64,
-    expanded: bool,
-) -> Zone {
-    let (left, top) = (f64::from(origin.x), f64::from(origin.y));
-    if expanded {
-        let margin = PANEL_MARGIN_X * scale;
-        Zone {
-            left: left + margin,
-            top,
-            right: left + f64::from(size.width) - margin,
-            bottom: top + PANEL_HEIGHT * scale,
-        }
-    } else {
-        Zone {
-            left,
-            top,
-            right: left + f64::from(size.width),
-            bottom: top + f64::from(size.height),
-        }
-    }
-}
-
+/// The area that counts as "over the island", in physical pixels: the black
+/// shape (bar when closed, panel when open), centred at the top of the window.
 struct Zone {
     left: f64,
     top: f64,
@@ -224,6 +202,18 @@ struct Zone {
 }
 
 impl Zone {
+    fn top_centre(window: PhysicalRect<i32, u32>, shape: PhysicalSize<f64>) -> Self {
+        let left =
+            f64::from(window.position.x) + (f64::from(window.size.width) - shape.width) / 2.0;
+        let top = f64::from(window.position.y);
+        Zone {
+            left,
+            top,
+            right: left + shape.width,
+            bottom: top + shape.height,
+        }
+    }
+
     fn contains(&self, point: PhysicalPosition<f64>) -> bool {
         (self.left..self.right).contains(&point.x) && (self.top..self.bottom).contains(&point.y)
     }
