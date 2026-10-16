@@ -13,7 +13,13 @@
     "noTimer": "--",
     "noTime": "--:--",
     "now": "Adesso",
-    "taskPlaceholder": "Su cosa stai lavorando?"
+    "taskPlaceholder": "Su cosa stai lavorando?",
+    "minutes": "min",
+    "otherDuration": "Altro…",
+    "pause": "Pausa",
+    "resume": "Riprendi",
+    "stop": "Ferma",
+    "done": "Fatto"
   },
   "states": {
     "focused": "Concentrato",

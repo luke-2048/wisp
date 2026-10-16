@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 mod app_state;
+mod commands;
 mod i18n;
 mod island;
 mod platform;
@@ -20,7 +21,16 @@ fn main() {
         .plugin(tauri_plugin_autostart::Builder::new().build())
         .manage(island::IslandState::default())
         .manage(app_state::AppState::default())
-        .invoke_handler(tauri::generate_handler![app_state::current_snapshot])
+        .invoke_handler(tauri::generate_handler![
+            app_state::current_snapshot,
+            commands::set_task,
+            commands::task_done,
+            commands::timer_start,
+            commands::timer_pause,
+            commands::timer_resume,
+            commands::timer_stop,
+            commands::set_editing,
+        ])
         .setup(|app| {
             island::setup(app.handle())?;
             tray::create(app.handle())?;

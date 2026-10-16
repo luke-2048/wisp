@@ -130,7 +130,7 @@ body {
   width: 540px;
   height: 236px;
   box-sizing: border-box;
-  padding: 34px 36px 26px 24px;
+  padding: 28px 32px 22px 24px;
   display: flex;
   align-items: center;
   gap: 24px;
@@ -156,6 +156,10 @@ body {
   height: 150px;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 .details {
   flex: 1;
   min-width: 0;
@@ -172,25 +176,62 @@ body {
   text-transform: uppercase;
 }
 
+.task-row {
+  height: 26px;
+}
+
+.task,
+.task-input {
+  width: 100%;
+  font: inherit;
+  font-size: 18px;
+  line-height: 26px;
+}
+
 .task {
   color: #fff;
-  font-size: 18px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: text;
+  outline: none;
 }
 
 .task.placeholder {
   color: #77727f;
 }
 
-.time {
-  margin-top: 10px;
+.task-input {
+  box-sizing: border-box;
+  padding: 0;
   color: #fff;
-  font-size: 40px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #3a3642;
+  outline: none;
+  caret-color: var(--palette-base);
+}
+
+.task-input::placeholder {
+  color: #5d5866;
+}
+
+.time {
+  margin-top: 6px;
+  color: #fff;
+  font-size: 38px;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  transition: opacity 200ms ease;
+}
+
+.details[data-timer='idle'] .time {
+  color: #5d5866;
+}
+
+.details[data-timer='paused'] .time {
+  opacity: 0.55;
 }
 
 .progress {
@@ -204,6 +245,82 @@ body {
   width: 0;
   height: 100%;
   background: var(--palette-base);
+  transition: width 250ms linear;
+}
+
+/* ---- Buttons ---- */
+
+.controls,
+.when-idle,
+.when-active {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.controls {
+  margin-top: 6px;
+}
+
+.details[data-timer='idle'] .when-active,
+.details:not([data-timer='idle']) .when-idle,
+.details[data-timer='running'] .resume,
+.details[data-timer='paused'] .pause {
+  display: none;
+}
+
+.chip {
+  height: 26px;
+  padding: 0 11px;
+  border: none;
+  border-radius: 13px;
+  background: #1f1d24;
+  color: #e9e6ef;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.chip:hover {
+  background: #2c2933;
+}
+
+.chip:focus-visible {
+  outline: 1px solid var(--palette-base);
+  outline-offset: 1px;
+}
+
+input.chip {
+  width: 64px;
+  box-sizing: border-box;
+  cursor: text;
+  outline: none;
+  caret-color: var(--palette-base);
+}
+
+.chip.done {
+  margin-left: auto;
+  background: var(--palette-base);
+  color: #2a2433;
+  font-weight: 600;
+}
+
+.chip.done:hover {
+  filter: brightness(1.06);
+}
+
+.chip.done:disabled {
+  background: #1f1d24;
+  color: #5d5866;
+  font-weight: 400;
+  cursor: default;
+  filter: none;
+}
+
+/* Closed bar: a paused timer simply looks quieter. */
+.timer.paused {
+  opacity: 0.5;
 }
 
 /* Wisp itself is styled in src/character/wisp.css. */

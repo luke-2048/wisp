@@ -31,6 +31,9 @@ local.
 - `break` triggers after 90 min of cumulative running timer; only a pause/stop lasting at
   least 5 min resets the count.
 - `night` runs from 23:00 to 05:00 (both configurable).
+- The focus streak (for `break`) is running timer time; it resets only after 5 min with no
+  timer running. "Fatto" does not stop the timer (a timer is a focus block, not a task).
+- "Ti aspetta" clears when the island is opened or closed (either way the user saw it).
 - Island window: always 580x266 and never resized (resizing a WebView mid-animation drops
   frames); closed = click-through, Rust polls the cursor every 20 ms; on hover clicks are
   re-enabled and CSS animates the black shape (spring open, smooth close). Closes 80 ms

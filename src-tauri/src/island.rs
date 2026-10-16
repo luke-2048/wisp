@@ -100,6 +100,11 @@ fn island_window(app: &AppHandle) -> tauri::Result<WebviewWindow> {
         .ok_or(tauri::Error::WindowNotFound)
 }
 
+/// While true (the user is typing in the island) it never closes.
+pub fn set_keep_open(app: &AppHandle, keep_open: bool) {
+    tracker(app).set_keep_open(keep_open);
+}
+
 fn tracker(app: &AppHandle) -> std::sync::MutexGuard<'_, HoverTracker> {
     // `lock()` waits for the lock; it only fails if another thread panicked
     // while holding it, and then the tracker is still usable.
@@ -183,10 +188,12 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
         Some(HoverAction::Expand) => {
             platform::current().set_click_through(&window, false)?;
             app.emit(ISLAND_EVENT, IslandEvent { open: true })?;
-            app_state::island_opened(app);
+            app_state::island_seen(app);
         }
         Some(HoverAction::Collapse) => {
             app.emit(ISLAND_EVENT, IslandEvent { open: false })?;
+            // If the timer ended while it was open, the user has seen it.
+            app_state::island_seen(app);
         }
         Some(HoverAction::Shrink) => {
             platform::current().set_click_through(&window, true)?;
