@@ -1,0 +1,15 @@
+[package]
+name = "wisp"
+description = "Wisp, a small focus companion that lives at the top of the screen"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[build-dependencies]
+tauri-build = { version = "2.7.3", features = [] }
+
+[dependencies]
+tauri = { version = "2.12.4", features = [] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+wisp-core = { path = "../crates/wisp-core" }

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="240" height="240" role="img" aria-label="Wisp, stato Concentrato">
+  <!-- Wisp, pseudo-3D — riferimento per lo stato "Concentrato", palette Lilla.
+       viewBox 120x120. Strati dal basso verso l'alto: ombra a terra, luce riflessa
+       a terra, braccine, corpo (gradiente radiale con luce in alto a sinistra),
+       luce che attraversa la base, bordo illuminato sul lato in ombra, riflessi,
+       guance sfumate, occhi lucidi, bocca. Gli altri stati cambiano occhi, bocca,
+       braccia, colori, opacità e trasformazione: vedi la tabella nel prompt. -->
+  <defs>
+    <!-- colori calcolati dal colore base #DCD5FB:
+         hi  = mix(base, #FFFFFF, 0.65)
+         lo  = mix(base, ombra palette #6E5FB8, 0.5)
+         sss = mix(base, caldo palette #F9CBEB, 0.7)
+         rim = mix(base, #FFFFFF, 0.75) -->
+    <radialGradient id="body" cx="0.4" cy="0.32" r="0.78" fx="0.34" fy="0.24">
+      <stop offset="0" stop-color="#F3F0FE"/>
+      <stop offset="0.5" stop-color="#DCD5FB"/>
+      <stop offset="1" stop-color="#A59ADA"/>
+    </radialGradient>
+    <radialGradient id="sss" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#F0CEF0" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#F0CEF0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="soft" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="eye" cx="0.5" cy="0.72" r="0.7">
+      <stop offset="0" stop-color="#5B4E72"/>
+      <stop offset="1" stop-color="#221C2C"/>
+    </radialGradient>
+    <filter id="blurS" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.2"/></filter>
+    <filter id="blurM" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
+    <filter id="blurL" x="-60%" y="-300%" width="220%" height="700%"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <path id="shape" d="M60 26 C82 26 96 42 96 62 C96 78 88 88 78 92 C84 96 92 96 98 92 C96 102 84 106 72 100 C68 98 64 98 60 98 C40 98 24 84 24 62 C24 42 38 26 60 26 Z"/>
+    <clipPath id="clip"><use href="#shape"/></clipPath>
+    <!-- bordo illuminato: il corpo meno una sua copia spostata in alto a sinistra -->
+    <mask id="rim" maskUnits="userSpaceOnUse" x="0" y="0" width="120" height="120">
+      <use href="#shape" fill="#FFFFFF"/>
+      <use href="#shape" transform="translate(-3.5 -3.5)" fill="#000000" filter="url(#blurM)"/>
+    </mask>
+  </defs>
+
+  <!-- ombra a terra e luce riflessa (fuori dal gruppo che galleggia) -->
+  <ellipse cx="60" cy="111" rx="20" ry="3.4" fill="#1D2230" opacity="0.22" filter="url(#blurL)"/>
+  <ellipse cx="60" cy="110" rx="15" ry="2" fill="#DCD5FB" opacity="0.45" filter="url(#blurL)"/>
+
+  <!-- gruppo che galleggia (±3px, 3.2s) -->
+  <g id="float">
+    <!-- braccine (posizione "giù") -->
+    <ellipse cx="26" cy="74" rx="5.2" ry="7.6" transform="rotate(28 26 74)" fill="url(#body)"/>
+    <ellipse cx="94" cy="74" rx="5.2" ry="7.6" transform="rotate(-28 94 74)" fill="url(#body)"/>
+
+    <!-- corpo -->
+    <use href="#shape" fill="url(#body)"/>
+    <g clip-path="url(#clip)">
+      <ellipse cx="62" cy="97" rx="36" ry="16" fill="url(#sss)"/>
+      <rect x="0" y="0" width="120" height="120" fill="#F6F5FE" opacity="0.6" mask="url(#rim)"/>
+    </g>
+
+    <!-- riflessi -->
+    <ellipse cx="45" cy="41" rx="14" ry="8" transform="rotate(-30 45 41)" fill="url(#soft)" opacity="0.75"/>
+    <ellipse cx="41" cy="38" rx="4.6" ry="2.6" transform="rotate(-32 41 38)" fill="#FFFFFF" opacity="0.9"/>
+    <circle cx="50" cy="33" r="1.3" fill="#FFFFFF" opacity="0.8"/>
+    <circle cx="80" cy="38" r="1.6" fill="#FFFFFF" opacity="0.55"/>
+
+    <!-- guance sfumate -->
+    <ellipse cx="37" cy="73" rx="6" ry="3.6" fill="#FF8FA3" opacity="0.6" filter="url(#blurS)"/>
+    <ellipse cx="81" cy="73" rx="6" ry="3.6" fill="#FF8FA3" opacity="0.6" filter="url(#blurS)"/>
+
+    <!-- occhi lucidi con due riflessi -->
+    <ellipse cx="47" cy="64" rx="4.2" ry="5.6" fill="url(#eye)"/>
+    <ellipse cx="71" cy="64" rx="4.2" ry="5.6" fill="url(#eye)"/>
+    <circle cx="48.6" cy="61.8" r="1.7" fill="#FFFFFF"/>
+    <circle cx="72.6" cy="61.8" r="1.7" fill="#FFFFFF"/>
+    <circle cx="45.6" cy="66.2" r="0.8" fill="#FFFFFF"/>
+    <circle cx="69.6" cy="66.2" r="0.8" fill="#FFFFFF"/>
+
+    <!-- bocca a "w" -->
+    <path d="M55.5 72 Q57.25 74.6 59 72 Q60.75 74.6 62.5 72" fill="none" stroke="#2A2433" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>

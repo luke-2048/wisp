@@ -1,0 +1,26 @@
+/* The window is transparent: only what we paint here is visible. */
+html,
+body {
+  margin: 0;
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Segoe UI Variable', 'Segoe UI', system-ui, sans-serif;
+  user-select: none;
+}
+
+#app {
+  display: flex;
+  justify-content: center;
+}
+
+.placeholder {
+  width: 240px;
+  height: 30px;
+  background: #000;
+  border-radius: 0 0 14px 14px;
+  color: #fff;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
