@@ -1,8 +1,8 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { palettes } from '../character/colors';
+import { createWisp } from '../character';
+import { palettes, type PaletteName } from '../character/colors';
 import { looks, type WispState } from '../character/states';
-import { applyState, renderWisp } from '../character/wisp';
 import { it } from '../i18n/it';
 import './island.css';
 import { panelHtml, setupPanel } from './panel';
@@ -11,7 +11,9 @@ import { playDone, playTimerEnd } from './sounds';
 
 // The island draws what the backend tells it:
 // - `wisp://island` opens or closes it (Rust watches the cursor);
-// - `wisp://state` carries Wisp's state, the task and the timer.
+// - `wisp://state` carries Wisp's state, the task and the timer;
+// - `wisp://cursor` is where the mouse is, anywhere on screen, so Wisp can
+//   look at you even when you are far from the island.
 // Between two snapshots the countdown runs on the local clock, only to keep
 // the numbers moving; when the timer ends is decided in Rust.
 // The palette comes from the settings, inside every snapshot.
@@ -23,14 +25,14 @@ if (app) {
     <div class="island" style="--palette-base:${palette.base}">
       <div class="shape">
         <div class="bar">
-          <span class="mini">${renderWisp({ id: 'mini', mini: true })}</span>
+          <span class="mini"></span>
           <span class="timer">
             <span class="dot"></span>
             <span class="minutes">${it.island.noTimer}</span>
           </span>
         </div>
         <div class="panel">
-          <div class="full">${renderWisp({ id: 'full' })}</div>
+          <div class="full"></div>
           ${panelHtml()}
         </div>
       </div>
@@ -42,8 +44,25 @@ if (app) {
   const minutes = q<HTMLSpanElement>('.minutes');
   const time = q<HTMLDivElement>('.time');
   const progress = q<HTMLDivElement>('.progress-fill');
-  const wisps = [...app.querySelectorAll<SVGSVGElement>('svg.wisp')];
   const panel = setupPanel(app);
+
+  // Two Wisps: the tiny one in the closed bar only looks around (the closed
+  // bar lets clicks through); the big one in the panel can be clicked,
+  // pulled like an elastic and petted.
+  const mini = createWisp(q<HTMLSpanElement>('.mini'), {
+    palette: 'lilla',
+    size: 24,
+    mode: 'island',
+    compact: true,
+    interactive: false,
+  });
+  const full = createWisp(q<HTMLDivElement>('.full'), {
+    palette: 'lilla',
+    size: 150,
+    mode: 'island',
+    area: q<HTMLDivElement>('.panel'),
+  });
+  const wisps = [mini, full];
 
   // Local countdown, re-synchronised by every snapshot.
   let timer = { status: 'idle', remainingMs: 0, totalMs: 0, endsAt: 0 };
@@ -63,10 +82,12 @@ if (app) {
   let previous: WispState | null = null;
 
   const show = (snapshot: Snapshot) => {
-    palette = palettes[snapshot.settings.palette];
+    const name: PaletteName = snapshot.settings.palette;
+    palette = palettes[name];
     island.style.setProperty('--palette-base', palette.base);
-    for (const svg of wisps) {
-      applyState(svg, snapshot.state, palette);
+    for (const wisp of wisps) {
+      wisp.setPalette(name);
+      wisp.setState(snapshot.state);
     }
     // 'none' | 'soft' | 'alert': island.css makes the closed bar call you.
     island.dataset.attention = looks[snapshot.state].attention;
@@ -89,10 +110,7 @@ if (app) {
     drawTime();
   };
 
-  // Draw Wisp right away, then ask the backend for the real snapshot.
-  for (const svg of wisps) {
-    applyState(svg, 'focused', palette);
-  }
+  // Ask the backend for the real snapshot (Wisp starts as 'focused').
   void invoke<Snapshot>('current_snapshot').then(show);
   void listen<Snapshot>('wisp://state', (event) => show(event.payload));
   void listen<{ open: boolean }>('wisp://island', (event) => {
@@ -101,8 +119,12 @@ if (app) {
     if (!event.payload.open) window.setTimeout(() => panel.reset(), 400);
   });
 
+  // Window coordinates, in CSS pixels: the same space as the page.
+  void listen<{ x: number; y: number }>('wisp://cursor', (event) => {
+    for (const wisp of wisps) wisp.setLookTarget(event.payload.x, event.payload.y);
+  });
+
   window.setInterval(drawTime, 250);
-  scheduleBlinks(wisps);
 }
 
 /** 1:05:09 for long timers, 24:59 otherwise. */
@@ -113,16 +135,4 @@ function formatTime(ms: number): string {
   const s = total % 60;
   const two = (n: number) => String(n).padStart(2, '0');
   return h > 0 ? `${h}:${two(m)}:${two(s)}` : `${two(m)}:${two(s)}`;
-}
-
-/** Wisp blinks every 3-6 s, at random so it feels alive rather than mechanical. */
-function scheduleBlinks(wisps: SVGSVGElement[]) {
-  const delay = 3000 + Math.random() * 3000;
-  window.setTimeout(() => {
-    for (const svg of wisps) {
-      svg.classList.add('blink');
-      window.setTimeout(() => svg.classList.remove('blink'), 160);
-    }
-    scheduleBlinks(wisps);
-  }, delay);
 }

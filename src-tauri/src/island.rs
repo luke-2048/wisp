@@ -49,9 +49,24 @@ const POLLS_PER_MONITOR_CHECK: u32 = 100;
 /// Event telling the frontend to play the open/close animation.
 const ISLAND_EVENT: &str = "wisp://island";
 
+/// Event with the cursor position, so Wisp can look at it anywhere on screen.
+const CURSOR_EVENT: &str = "wisp://cursor";
+
+/// Every this many polls (40 ms, about 25 times a second) we send the cursor,
+/// and only if it moved: plenty for the eyes, nearly free for the CPU.
+const POLLS_PER_CURSOR_EVENT: u32 = 2;
+
 #[derive(Clone, Serialize)]
 struct IslandEvent {
     open: bool,
+}
+
+/// Cursor position in logical pixels, relative to the island window's top-left
+/// corner: the same coordinates the page uses.
+#[derive(Clone, Copy, PartialEq, Serialize)]
+struct CursorEvent {
+    x: f64,
+    y: f64,
 }
 
 /// Shared between the polling thread and the tray. A `Mutex` is a lock: only
@@ -144,11 +159,18 @@ fn start_polling(app: AppHandle) {
     // for as long as it runs (here: until Wisp quits).
     thread::spawn(move || {
         let mut polls: u32 = 0;
+        // `Option` is either `Some(value)` or `None`: here, nothing sent yet.
+        let mut last_cursor: Option<CursorEvent> = None;
         loop {
             thread::sleep(POLL_INTERVAL);
             polls = polls.wrapping_add(1);
             if let Err(error) = follow_cursor(&app) {
                 eprintln!("could not follow the cursor: {error}");
+            }
+            if polls.is_multiple_of(POLLS_PER_CURSOR_EVENT)
+                && let Err(error) = send_cursor(&app, &mut last_cursor)
+            {
+                eprintln!("could not send the cursor: {error}");
             }
             if polls.is_multiple_of(POLLS_PER_MONITOR_CHECK)
                 && let Err(error) = reposition(&app)
@@ -199,6 +221,28 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
             platform::current().set_click_through(&window, true)?;
         }
         None => {}
+    }
+    Ok(())
+}
+
+/// Tells the frontend where the cursor is, if the island is visible and the
+/// cursor moved since last time. `&mut` lets us update the caller's
+/// `last_cursor` in place.
+fn send_cursor(app: &AppHandle, last_cursor: &mut Option<CursorEvent>) -> tauri::Result<()> {
+    let window = island_window(app)?;
+    if !window.is_visible()? {
+        return Ok(());
+    }
+    let cursor = app.cursor_position()?;
+    let origin = window.outer_position()?;
+    let scale = window.scale_factor()?;
+    let event = CursorEvent {
+        x: ((cursor.x - f64::from(origin.x)) / scale).round(),
+        y: ((cursor.y - f64::from(origin.y)) / scale).round(),
+    };
+    if *last_cursor != Some(event) {
+        app.emit_to(LABEL, CURSOR_EVENT, event)?;
+        *last_cursor = Some(event);
     }
     Ok(())
 }
