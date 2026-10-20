@@ -92,10 +92,12 @@ export function createRenderer({ id, compact, size }: RenderOptions): Renderer {
         <g clip-path="${ref('clip')}">
           <ellipse cx="62" cy="97" rx="36" ry="16" fill="${ref('sss')}"/>
           <rect data-part="rim" x="-20" y="-20" width="160" height="160" opacity="0.6" mask="${ref('rim')}"/>
+          <!-- Highlights move against the gaze: clipped, so they never leave the body.
+               The sharp one is softer than in the reference (owner's choice). -->
+          <ellipse data-part="h1" rx="14" ry="8" opacity="0.75" fill="${ref('soft')}"/>
+          <ellipse data-part="h2" rx="4.6" ry="2.6" opacity="0.65" fill="#FFFFFF"/>
+          <circle data-part="h3" r="1.3" opacity="0.8" fill="#FFFFFF"/>
         </g>
-        <ellipse data-part="h1" rx="14" ry="8" opacity="0.75" fill="${ref('soft')}"/>
-        <ellipse data-part="h2" rx="4.6" ry="2.6" opacity="0.9" fill="#FFFFFF"/>
-        <circle data-part="h3" r="1.3" opacity="0.8" fill="#FFFFFF"/>
       </g>
       <ellipse data-part="cheekL" ry="3.6" fill="${CHEEK}" filter="${ref('blur-s')}"/>
       <ellipse data-part="cheekR" ry="3.6" fill="${CHEEK}" filter="${ref('blur-s')}"/>
