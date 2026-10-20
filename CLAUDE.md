@@ -72,7 +72,7 @@ local.
   click-through window is layered and stays invisible unless its opacity is set.
 - Frontend: Vite + plain TypeScript + SVG, no UI framework.
 - Before committing: `cargo fmt --all`, `cargo clippy --workspace -- -D warnings`,
-  `cargo test --workspace`, `npm run lint`, `npm run format:check`.
+  `cargo test --workspace`, `npm test`, `npm run lint`, `npm run format:check`.
 - Default branch `main`. License MIT. Public repo: https://github.com/luke-2048/wisp
   (account `luke-2048`; commits use the GitHub noreply email set in the local git config).
 - CI (`.github/workflows/ci.yml`) runs the checks above on `windows-latest` for every push

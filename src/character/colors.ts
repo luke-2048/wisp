@@ -40,7 +40,10 @@ export const palettes: Record<PaletteName, Palette> = {
 
 export const INK = '#2A2433';
 export const CHEEK = '#FF8FA3';
-const WHITE = '#FFFFFF';
+export const WHITE = '#FFFFFF';
+
+/** Red, green, blue, each 0..255. */
+export type Rgb = [number, number, number];
 
 /** Linear mix: t = 0 gives `from`, t = 1 gives `to`. */
 export function mix(from: string, to: string, t: number): string {
@@ -69,11 +72,13 @@ export function bodyColors(base: string, palette: Palette): BodyColors {
   };
 }
 
-function toRgb(hex: string): [number, number, number] {
+export function toRgb(hex: string): Rgb {
   const n = parseInt(hex.slice(1), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 }
 
-function toHex(rgb: [number, number, number]): string {
-  return '#' + rgb.map((c) => c.toString(16).padStart(2, '0').toUpperCase()).join('');
+/** Channels are rounded and kept in 0..255, so a colour halfway through a fade still works. */
+export function toHex(rgb: Rgb): string {
+  const channel = (c: number) => Math.max(0, Math.min(255, Math.round(c)));
+  return '#' + rgb.map((c) => channel(c).toString(16).padStart(2, '0').toUpperCase()).join('');
 }

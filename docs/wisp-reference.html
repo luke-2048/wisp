@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wisp — riferimento animazione</title>
+<!--
+  Riferimento del personaggio Wisp animato (SVG + molle, JavaScript semplice, nessuna dipendenza).
+  Apri questo file nel browser per provarlo. È la base da portare in TypeScript dentro l'app:
+  la logica (molle, parametri, geometria) va ripresa; la struttura del codice va rifatta come
+  descritto nel prompt WISP_personaggio.md.
+-->
+<style>
+  :root { --ink: #1D2230; --muted: #5B6070; --bg: #F4F5F7; --accent: #5B4BC4; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 1000px; margin: 0 auto; padding: 24px 16px 40px; display: flex; flex-direction: column; gap: 16px; }
+  h1 { margin: 0; font-size: 28px; }
+  p { margin: 0; color: var(--muted); }
+  #stage { position: relative; width: 100%; aspect-ratio: 952 / 640; border-radius: 24px; overflow: hidden; touch-action: none; user-select: none; background: #ECE8FB; }
+  #shadow { position: absolute; border-radius: 50%; background: radial-gradient(closest-side, rgba(29,34,48,0.3), rgba(29,34,48,0)); pointer-events: none; }
+  #wisp { position: absolute; overflow: visible; touch-action: none; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; }
+  button { min-height: 44px; padding: 0 14px; border-radius: 12px; border: 2px solid #E4E6EB; background: #fff; color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
+  button[aria-pressed="true"] { border-color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Wisp — riferimento animazione</h1>
+  <p>Muovi il mouse, clicca, trascina, accarezza avanti e indietro, oppure lascialo stare.</p>
+  <div id="stage">
+    <div id="shadow"></div>
+    <svg id="wisp" viewBox="0 0 120 120" role="img" aria-label="Wisp">
+      <defs>
+        <radialGradient id="w-body" cx="0.4" cy="0.32" r="0.78" fx="0.34" fy="0.24">
+          <stop id="w-hi" offset="0"/><stop id="w-mid" offset="0.5"/><stop id="w-lo" offset="1"/>
+        </radialGradient>
+        <radialGradient id="w-sss" cx="0.5" cy="0.5" r="0.5">
+          <stop id="w-sss0" offset="0" stop-opacity="0.85"/><stop id="w-sss1" offset="1" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="w-soft" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="w-eye" cx="0.5" cy="0.72" r="0.7">
+          <stop offset="0" stop-color="#5B4E72"/><stop offset="1" stop-color="#221C2C"/>
+        </radialGradient>
+        <radialGradient id="w-glowg" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="#FFE89A" stop-opacity="0.9"/><stop offset="1" stop-color="#FFE89A" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="w-blur-s" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.2"/></filter>
+        <filter id="w-blur-m" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="1.6"/></filter>
+        <clipPath id="w-clip"><path id="w-clip-path"/></clipPath>
+        <mask id="w-rim" maskUnits="userSpaceOnUse" x="-20" y="-20" width="160" height="160">
+          <path id="w-rim-a" fill="#FFFFFF"/>
+          <path id="w-rim-b" fill="#000000" filter="url(#w-blur-m)"/>
+        </mask>
+      </defs>
+      <circle id="w-glow" cx="60" cy="64" r="54" fill="url(#w-glowg)"/>
+      <g id="w-bob">
+        <g id="w-sq">
+          <g id="w-op">
+            <ellipse id="w-armL" rx="5.2" ry="7.6" fill="url(#w-body)"/>
+            <ellipse id="w-armR" rx="5.2" ry="7.6" fill="url(#w-body)"/>
+            <path id="w-bodyp" fill="url(#w-body)"/>
+            <g clip-path="url(#w-clip)">
+              <ellipse cx="62" cy="97" rx="36" ry="16" fill="url(#w-sss)"/>
+              <rect id="w-rimr" x="-20" y="-20" width="160" height="160" opacity="0.6" mask="url(#w-rim)"/>
+            </g>
+            <ellipse id="w-h1" rx="14" ry="8" opacity="0.75" fill="url(#w-soft)"/>
+            <ellipse id="w-h2" rx="4.6" ry="2.6" opacity="0.9" fill="#FFFFFF"/>
+            <circle id="w-h3" r="1.3" opacity="0.8" fill="#FFFFFF"/>
+          </g>
+          <ellipse id="w-cheekL" ry="3.6" fill="#FF8FA3" filter="url(#w-blur-s)"/>
+          <ellipse id="w-cheekR" ry="3.6" fill="#FF8FA3" filter="url(#w-blur-s)"/>
+          <path id="w-eyeL" fill="url(#w-eye)" stroke="#2A2433" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path id="w-eyeR" fill="url(#w-eye)" stroke="#2A2433" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle id="w-g1" r="1.6" fill="#FFFFFF"/><circle id="w-g2" r="1.6" fill="#FFFFFF"/>
+          <circle id="w-k1" r="0.8" fill="#FFFFFF"/><circle id="w-k2" r="0.8" fill="#FFFFFF"/>
+          <path id="w-mouth" fill="#2A2433" stroke="#2A2433" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <text id="w-q" x="104" y="30" font-weight="800" font-size="20" fill="#D98A1E" text-anchor="middle">?</text>
+        <path id="w-sweat" d="M100 34 Q104 40 104 43 A4 4 0 0 1 96 43 Q96 40 100 34 Z" fill="#8EC5F0"/>
+        <g id="w-bang"><circle cx="102" cy="20" r="9" fill="#4F74E3"/><text x="102" y="25" font-weight="800" font-size="13" fill="#FFFFFF" text-anchor="middle">!</text></g>
+        <g id="w-spark" fill="#F6C343">
+          <path d="M14 16 Q14 22 20 22 Q14 22 14 28 Q14 22 8 22 Q14 22 14 16 Z"/>
+          <path d="M104 4 Q104 9 109 9 Q104 9 104 14 Q104 9 99 9 Q104 9 104 4 Z"/>
+          <path d="M12 84 Q12 88 16 88 Q12 88 12 92 Q12 88 8 88 Q12 88 12 84 Z"/>
+        </g>
+        <g id="w-z" font-weight="800" fill="#7A8099" text-anchor="middle"><text x="98" y="36" font-size="13">z</text><text x="108" y="24" font-size="10">z</text></g>
+      </g>
+    </svg>
+  </div>
+  <div class="row" id="states" role="group" aria-label="Stato"></div>
+  <div class="row" id="palettes" role="group" aria-label="Colore"></div>
+</main>
+<script>
+// ---------- Dati: stati, reazioni, palette ----------
+// Ogni stato è un insieme di OBIETTIVI per parametri continui. Le molle li inseguono,
+// quindi le transizioni tra stati sono sempre fluide.
+//   open   apertura occhi (1 = normale, >1 spalancati, <0 chiusi a ∪)
+//   happy  0..1 occhi a ∩ (felici)
+//   smile  curvatura bocca (-1 triste .. 1 sorriso)
+//   mo     apertura bocca 0..1     mw  mezza larghezza bocca
+//   blush  guance   op  opacità corpo   arm  0 giù .. 1 su   rise  spostamento verticale   glow  alone
+var STATES = [
+  { id: 'focused',    label: 'Concentrato',   tone: 'base',  sym: '',      look: null,              e: { open: 1,     happy: 0, smile: 0.35,  mo: 0,   mw: 3.6, blush: 0.6,  op: 1,    arm: 0, rise: 0,  glow: 0 } },
+  { id: 'distracted', label: 'Distratto',     tone: 'base',  sym: 'q',     look: { x: 0.95, y: -0.35 }, e: { open: 0.95, happy: 0, smile: -0.25, mo: 0,   mw: 4,   blush: 0,    op: 0.4,  arm: 0, rise: 0,  glow: 0 } },
+  { id: 'break',      label: 'Fai una pausa', tone: 'dim',   sym: 'sweat', look: null,              e: { open: 0.32,  happy: 0, smile: -0.1,  mo: 0,   mw: 3,   blush: 0,    op: 0.92, arm: 0, rise: 3,  glow: 0 } },
+  { id: 'waiting',    label: 'Ti aspetta',    tone: 'base',  sym: 'bang',  look: null,              e: { open: 1.22,  happy: 0, smile: 0,     mo: 0.6, mw: 2.6, blush: 0.6,  op: 1,    arm: 1, rise: -6, glow: 0 } },
+  { id: 'done',       label: 'Fatto!',        tone: 'light', sym: 'spark', look: null,              e: { open: 0.8,   happy: 1, smile: 1,     mo: 0.6, mw: 5,   blush: 0.7,  op: 1,    arm: 1, rise: -4, glow: 0.55 } },
+  { id: 'night',      label: 'Buonanotte',    tone: 'night', sym: 'z',     look: null,              e: { open: -0.15, happy: 0, smile: 0.15,  mo: 0.3, mw: 1.5, blush: 0.35, op: 0.95, arm: 0, rise: 5,  glow: 0 } }
+];
+// Reazioni all'interazione: sovrascrivono temporaneamente gli obiettivi dello stato.
+var REACT = {
+  squish: { open: 0.2,  happy: 0.7, smile: 0.5, mo: 0.1,  mw: 3,   blush: 1.1, op: 1, arm: 0.15, rise: 2,  glow: 0 },    // tenuto premuto
+  giggle: { open: 0.85, happy: 1,   smile: 1,   mo: 0.55, mw: 4.6, blush: 1.1, op: 1, arm: 0.7,  rise: -3, glow: 0.25 }, // rilasciato
+  whee:   { open: 1.3,  happy: 0,   smile: 0.2, mo: 0.85, mw: 2.6, blush: 0.7, op: 1, arm: 1,    rise: 0,  glow: 0 },    // trascinato
+  love:   { open: 0.7,  happy: 1,   smile: 0.9, mo: 0.15, mw: 4,   blush: 1.4, op: 1, arm: 0.35, rise: -2, glow: 0.35 }  // accarezzato
+};
+var PALS = [
+  { id: 'lilla', label: 'Lilla', bg: '#ECE8FB', base: '#DCD5FB', light: '#E9E4FF', dim: '#D2CDE2', night: '#BDB6DD', shade: '#6E5FB8', warm: '#F9CBEB' },
+  { id: 'menta', label: 'Menta', bg: '#E3F4EF', base: '#C9EEDF', light: '#DDF7EC', dim: '#CFDDD7', night: '#A9CFC1', shade: '#3F8F7A', warm: '#FFF5C8' },
+  { id: 'pesca', label: 'Pesca', bg: '#FDEEE6', base: '#FFD8C6', light: '#FFE6DA', dim: '#E7D6CF', night: '#E0B8A8', shade: '#C9735C', warm: '#FFEFC2' }
+];
+var SYMS = ['q', 'sweat', 'bang', 'spark', 'z'];
+
+// ---------- Utilità ----------
+function hx(h) { h = h.replace('#', ''); return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)]; }
+function hex(c) { var o = '#'; for (var i = 0; i < 3; i++) { var v = Math.max(0, Math.min(255, Math.round(c[i]))); o += (v < 16 ? '0' : '') + v.toString(16); } return o; }
+function mix(a, b, t) { var A = hx(a), B = hx(b); return hex([A[0] + (B[0] - A[0]) * t, A[1] + (B[1] - A[1]) * t, A[2] + (B[2] - A[2]) * t]); }
+function cl(v, a, b) { return Math.max(a, Math.min(b, v)); }
+function r2(n) { return Math.round(n * 100) / 100; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+// Molla smorzata (Eulero semi-implicito). k = rigidità, c = smorzamento.
+function spr(o, key, v, target, k, c, dt) { var a = k * (target - o[key]) - c * v[key]; v[key] += a * dt; o[key] += v[key] * dt; }
+// Corpo con la codina parametrica (t sposta la punta della codina).
+function bodyPath(t) {
+  return 'M60 26 C82 26 96 42 96 62 C96 78 88 88 78 92 C' + r2(84 + t * 0.5) + ' 96 ' + r2(92 + t) + ' 96 ' + r2(98 + t) + ' ' + r2(92 - t * 0.3) +
+         ' C' + r2(96 + t) + ' 102 84 106 72 100 C68 98 64 98 60 98 C40 98 24 84 24 62 C24 42 38 26 60 26 Z';
+}
+
+// ---------- Scena ----------
+var W = 952, H = 640, HX = 476, HY = 318, S = 300;
+var ui = { sel: 0, pal: 0 };
+var reduced = false; try { reduced = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+var e0 = {}, ev0 = {};
+for (var k in STATES[0].e) { e0[k] = STATES[0].e[k]; ev0[k] = 0; }
+SYMS.forEach(function (n) { e0[n] = 0; ev0[n] = 0; });
+var s = {
+  t: 0, px: HX, py: HY, vx: 0, vy: 0, sx: 1, vsx: 0, sy: 1, vsy: 0,
+  lx: 0, vlx: 0, ly: 0, vly: 0, tail: 0, vtail: 0, ax: 0, vax: 0, ay: 0, vay: 0,
+  e: e0, ev: ev0, col: hx('#DCD5FB'),
+  mx: HX, my: HY - 120, inside: false, lastMove: -10,
+  pressed: false, dragging: false, downX: 0, downY: 0, gx: 0, gy: 0,
+  react: null, reactUntil: 0, pet: 0, prevX: 0,
+  blinkAt: 2, blinkT: -1, idleX: 0, idleY: 0, idleNext: 0, nextHop: 1
+};
+
+// ---------- Input ----------
+var stage = document.getElementById('stage'), svg = document.getElementById('wisp');
+function toStage(ev) { var r = stage.getBoundingClientRect(); return { x: (ev.clientX - r.left) * W / r.width, y: (ev.clientY - r.top) * H / r.height }; }
+stage.addEventListener('pointermove', function (ev) {
+  var p = toStage(ev);
+  s.mx = p.x; s.my = p.y; s.inside = true; s.lastMove = s.t;
+  if (s.pressed && !s.dragging && Math.hypot(p.x - s.downX, p.y - s.downY) > 8) { s.dragging = true; s.gx = s.downX - s.px; s.gy = s.downY - s.py; }
+  if (!s.pressed && Math.hypot(p.x - s.px, p.y - s.py) < 115) {        // carezza: movimento orizzontale accumulato sopra Wisp
+    s.pet += Math.abs(p.x - s.prevX);
+    if (s.pet > 900) { s.react = 'love'; s.reactUntil = s.t + 1.8; s.pet = 0; }
+  }
+  s.prevX = p.x;
+});
+stage.addEventListener('pointerleave', function () { s.inside = false; release(); });
+stage.addEventListener('pointerup', release);
+svg.addEventListener('pointerdown', function (ev) {
+  var p = toStage(ev);
+  s.downX = p.x; s.downY = p.y; s.mx = p.x; s.my = p.y; s.pressed = true; s.dragging = false;
+  ev.preventDefault();
+});
+function release() {
+  if (!s.pressed) return;
+  var wasDrag = s.dragging;
+  s.pressed = false; s.dragging = false;
+  s.react = 'giggle'; s.reactUntil = s.t + (wasDrag ? 0.7 : 0.9);
+  if (!wasDrag) { s.vsy += 5.5; s.vsx -= 3.5; s.vy -= 260; }        // rimbalzo: spinta alla molla di schiacciamento + saltello
+}
+
+// ---------- Simulazione ----------
+function step(dt) {
+  var st = STATES[ui.sel], pal = PALS[ui.pal];
+  s.t += dt;
+  if (s.react && s.t > s.reactUntil) s.react = null;
+  var react = s.pressed ? (s.dragging ? 'whee' : 'squish') : s.react;
+  var dxm = s.mx - s.px, dym = s.my - s.py, dist = Math.hypot(dxm, dym);
+  var near = s.inside && dist < 190 && (s.t - s.lastMove) < 4;
+  s.pet *= Math.exp(-dt * 1.5);
+
+  // 1. obiettivi dell'espressione: stato → vicinanza del mouse → reazione
+  var tg = {}, k, i;
+  for (k in st.e) tg[k] = st.e[k];
+  SYMS.forEach(function (n) { tg[n] = st.sym === n ? 1 : 0; });
+  if (near && !react) {
+    if (st.id === 'night') { tg.open = 0.22; tg.z = 0.5; }
+    else { tg.open += 0.08; tg.rise -= 2; tg.arm = Math.max(tg.arm, 0.25); tg.blush = Math.max(tg.blush, 0.7); }
+    if (st.id === 'distracted') tg.op = 0.7;
+  }
+  if (react) { var R = REACT[react]; for (k in R) tg[k] = R[k]; SYMS.forEach(function (n) { tg[n] = 0; }); if (react === 'love') tg.spark = 0.6; }
+  for (k in s.e) spr(s.e, k, s.ev, tg[k], 150, 20, dt);
+
+  // 2. sguardo: dove va, il mouse, lo stato, oppure occhiate a caso
+  var lt;
+  if (react === 'whee') lt = { x: cl(s.vx / 600, -1, 1), y: cl(s.vy / 600, -1, 1) };
+  else if (st.look && !near && !react) lt = st.look;
+  else if (s.inside && (s.t - s.lastMove) < 5) lt = { x: cl(dxm / 260, -1, 1), y: cl(dym / 260, -1, 1) };
+  else {
+    if (s.t > s.idleNext) {
+      s.idleX = Math.random() * 1.6 - 0.8; s.idleY = Math.random() * 0.7 - 0.4;
+      s.idleNext = s.t + 1.6 + Math.random() * 2.6;
+      if (!reduced && Math.random() < 0.25 && st.id !== 'night' && st.id !== 'break') s.vy -= 200;
+    }
+    lt = { x: s.idleX, y: s.idleY };
+  }
+  if (st.id === 'night' && !react) lt = { x: lt.x * 0.3, y: 0.2 };
+  var L = { x: s.lx, y: s.ly }, LV = { x: s.vlx, y: s.vly };
+  spr(L, 'x', LV, lt.x, 70, 12, dt); spr(L, 'y', LV, lt.y, 70, 12, dt);
+  s.lx = L.x; s.ly = L.y; s.vlx = LV.x; s.vly = LV.y;
+
+  // 3. posizione: a casa (molla morbida, ondeggia) o trascinato (molla rigida)
+  if (st.id === 'waiting' && !react && !reduced && s.t > s.nextHop) { s.vy -= 170; s.nextHop = s.t + 1.6; }
+  var tx = HX, ty = HY;
+  if (s.dragging) { tx = cl(s.mx - s.gx, 120, W - 120); ty = cl(s.my - s.gy, 110, H - 150); }
+  var P = { x: s.px, y: s.py }, PV = { x: s.vx, y: s.vy };
+  spr(P, 'x', PV, tx, s.dragging ? 320 : 75, s.dragging ? 30 : 9, dt); spr(P, 'y', PV, ty, s.dragging ? 320 : 75, s.dragging ? 30 : 9, dt);
+  s.px = P.x; s.py = P.y; s.vx = PV.x; s.vy = PV.y;
+
+  // 4. schiacciamento e allungamento (squash & stretch), anche in base alla velocità
+  var tsx = 1, tsy = 1;
+  if (s.pressed && !s.dragging) { tsx = 1.22; tsy = 0.76; }
+  if (st.id === 'break' && !react) { tsx *= 1.06; tsy *= 0.92; }
+  var str = Math.min(Math.hypot(s.vx, s.vy) / 2600, 0.2);
+  if (Math.abs(s.vy) > Math.abs(s.vx)) { tsy += str; tsx -= str * 0.6; } else { tsx += str; tsy -= str * 0.6; }
+  var Q = { x: s.sx, y: s.sy }, QV = { x: s.vsx, y: s.vsy };
+  spr(Q, 'x', QV, tsx, 420, 11, dt); spr(Q, 'y', QV, tsy, 420, 11, dt);
+  s.sx = Q.x; s.sy = Q.y; s.vsx = QV.x; s.vsy = QV.y;
+
+  // 5. movimento secondario: codina e braccine arrivano in ritardo (follow-through)
+  var X = { tail: s.tail, ax: s.ax, ay: s.ay }, XV = { tail: s.vtail, ax: s.vax, ay: s.vay };
+  spr(X, 'tail', XV, cl(-s.vx / 110, -9, 9) + Math.sin(s.t * 2.1) * 1.4 - s.lx * 2.5, 90, 8, dt);
+  spr(X, 'ax', XV, cl(-s.vx / 220, -5, 5), 80, 7, dt);
+  spr(X, 'ay', XV, cl(-s.vy / 160, -6, 6) + Math.sin(s.t * 2.6) * 0.8, 80, 7, dt);
+  s.tail = X.tail; s.ax = X.ax; s.ay = X.ay; s.vtail = XV.tail; s.vax = XV.ax; s.vay = XV.ay;
+
+  // 6. battito di ciglia casuale
+  if (s.blinkT < 0 && s.t > s.blinkAt) s.blinkT = 0;
+  var blink = 0;
+  if (s.blinkT >= 0) { s.blinkT += dt; if (s.blinkT > 0.16) { s.blinkT = -1; s.blinkAt = s.t + 2.5 + Math.random() * 3.5; } else blink = Math.sin(Math.PI * s.blinkT / 0.16); }
+  if (reduced) blink = 0;
+
+  // 7. colore che sfuma verso quello dello stato
+  var tone = (react === 'giggle' || react === 'love') ? 'light' : st.tone;
+  var tc = hx(pal[tone]), lr = Math.min(1, dt * 6);
+  for (i = 0; i < 3; i++) s.col[i] += (tc[i] - s.col[i]) * lr;
+
+  return geometry(st, pal, blink, react);
+}
+
+// ---------- Geometria: parametri → attributi SVG ----------
+function geometry(st, pal, blink, react) {
+  var e = s.e, lx = s.lx, ly = s.ly, al = Math.abs(lx);
+  var bob = reduced ? 0 : Math.sin(s.t * Math.PI * 2 / (st.id === 'night' ? 4.5 : 3.2)) * (st.id === 'night' ? 1.5 : 3);
+  var yOff = bob + e.rise;
+  var fdx = lx * 8, fdy = ly * 5;                                         // la faccia scivola verso lo sguardo: effetto "si gira"
+  var col = hex(s.col);
+  var o = e.open, oe = o >= 0 ? o * (1 - blink) : o;
+  var top = oe >= 0 ? 5.6 * oe : oe * 14;                                 // palpebra superiore
+  var bot = top - (oe >= 0 ? Math.max(0, e.happy) * 7.5 : 0);             // palpebra inferiore: sale con happy → occhi a ∩
+  var sp = 12 * (1 - 0.15 * al), cx0 = 59 + fdx, ey = 64 + fdy;
+  var exL = cx0 - sp, exR = cx0 + sp;
+  var rxL = 4.2 * (1 - 0.32 * Math.max(-lx, 0)), rxR = 4.2 * (1 - 0.32 * Math.max(lx, 0)); // scorcio: l'occhio lontano si stringe
+  // due curve cubiche con i punti di controllo agli estremi: forma tonda, non a mandorla
+  function eyeD(cx, rx) {
+    var yt = r2(ey - top * 4 / 3), yb = r2(ey + bot * 4 / 3), a = r2(cx - rx), b = r2(cx + rx), y = r2(ey);
+    return 'M' + a + ' ' + y + ' C' + a + ' ' + yt + ' ' + b + ' ' + yt + ' ' + b + ' ' + y + ' C' + b + ' ' + yb + ' ' + a + ' ' + yb + ' ' + a + ' ' + y + ' Z';
+  }
+  var mx = 59 + fdx * 1.05, my = 72 + fdy, mw = Math.max(0.8, e.mw * (1 - 0.15 * al)), sm = e.smile, mo = Math.max(0, e.mo);
+  var arm = cl(e.arm, -0.2, 1.2);
+  var wave = (st.id === 'done' && !react && !reduced) ? Math.sin(s.t * 9) * 12 * arm : 0;
+  var height = (HY - s.py) - yOff * 2.5, sc = cl(1 - height / 380, 0.45, 1.15);
+  return {
+    alt: 'Wisp, stato: ' + st.label, bg: pal.bg,
+    px: s.px, py: s.py, cursor: (s.pressed || s.dragging) ? 'grabbing' : 'grab',
+    shW: 130 * sc * s.sx, shH: 24 * sc, shY: HY + 135, shOp: 0.95 * sc,
+    hi: mix(col, '#FFFFFF', 0.65), mid: col, lo: mix(col, pal.shade, 0.5), sss: mix(col, pal.warm, 0.7), rim: mix(col, '#FFFFFF', 0.75),
+    gfx: r2(0.34 - lx * 0.06), glow: cl(e.glow, 0, 1), yOff: r2(yOff),
+    sqT: 'translate(60 100) scale(' + r2(s.sx * (1 - 0.05 * al)) + ' ' + r2(s.sy) + ') translate(-60 -100)',
+    op: cl(e.op, 0, 1), bodyD: bodyPath(s.tail), rimT: 'translate(' + r2(-3.5 - lx * 1.5) + ' ' + r2(-3.5 - ly) + ')',
+    aL: [lerp(26, 24, arm) + s.ax - lx * 1.5, lerp(74, 50, arm) + s.ay, lerp(28, -30, arm) + wave],
+    aR: [lerp(94, 96, arm) + s.ax - lx * 1.5, lerp(74, 50, arm) + s.ay * 0.8, lerp(-28, 30, arm) - wave],
+    h1: [45 - lx * 4, 41 - ly * 3], h2: [41 - lx * 4.8, 38 - ly * 3.6], h3: [50 - lx * 4.4, 33 - ly * 3.3], // i riflessi vanno al contrario: la luce resta ferma
+    cL: [cx0 - 22 * (1 - 0.1 * al), 6 * (1 - 0.45 * Math.max(-lx, 0))], cR: [cx0 + 22 * (1 - 0.1 * al), 6 * (1 - 0.45 * Math.max(lx, 0))], cy: 73 + fdy,
+    blush: cl(e.blush, 0, 1.4) * 0.6,
+    eyeL: eyeD(exL, rxL), eyeR: eyeD(exR, rxR),
+    gOp: cl((top - 3) / 1.5, 0, 1) * cl(1 - e.happy, 0, 1),
+    g1: [exL + rxL * 0.38, ey - top * 0.45], g2: [exR + rxR * 0.38, ey - top * 0.45],
+    k1: [exL - rxL * 0.35, ey + top * 0.35], k2: [exR - rxR * 0.35, ey + top * 0.35],
+    mouthD: 'M' + r2(mx - mw) + ' ' + r2(my) + ' Q' + r2(mx) + ' ' + r2(my + sm * 5) + ' ' + r2(mx + mw) + ' ' + r2(my) + ' Q' + r2(mx) + ' ' + r2(my + sm * 5 + mo * 9) + ' ' + r2(mx - mw) + ' ' + r2(my) + ' Z',
+    mFill: cl(mo * 5, 0, 1),
+    sym: { q: e.q, sweat: e.sweat, bang: e.bang, spark: e.spark, z: e.z }
+  };
+}
+
+// ---------- Rendering: aggiorna solo attributi, mai ricreare il DOM ----------
+var $ = function (id) { return document.getElementById(id); };
+function set(id, a) { var el = $(id); for (var k in a) el.setAttribute(k, typeof a[k] === 'number' ? r2(a[k]) : a[k]); }
+var shadow = $('shadow');
+function apply(f) {
+  var r = stage.getBoundingClientRect(), u = r.width / W;                // pixel per unità di scena
+  stage.style.background = f.bg;
+  shadow.style.left = (f.px - f.shW / 2) * u + 'px'; shadow.style.top = (f.shY - f.shH / 2) * u + 'px';
+  shadow.style.width = f.shW * u + 'px'; shadow.style.height = f.shH * u + 'px'; shadow.style.opacity = f.shOp;
+  svg.style.left = (f.px - S / 2) * u + 'px'; svg.style.top = (f.py - S / 2) * u + 'px';
+  svg.style.width = S * u + 'px'; svg.style.height = S * u + 'px'; svg.style.cursor = f.cursor;
+  svg.setAttribute('aria-label', f.alt);
+  set('w-hi', { 'stop-color': f.hi }); set('w-mid', { 'stop-color': f.mid }); set('w-lo', { 'stop-color': f.lo });
+  set('w-sss0', { 'stop-color': f.sss }); set('w-sss1', { 'stop-color': f.sss }); set('w-body', { fx: f.gfx });
+  set('w-clip-path', { d: f.bodyD }); set('w-rim-a', { d: f.bodyD }); set('w-rim-b', { d: f.bodyD, transform: f.rimT });
+  set('w-glow', { opacity: f.glow }); set('w-bob', { transform: 'translate(0 ' + f.yOff + ')' }); set('w-sq', { transform: f.sqT }); set('w-op', { opacity: f.op });
+  set('w-armL', { cx: f.aL[0], cy: f.aL[1], transform: 'rotate(' + r2(f.aL[2]) + ' ' + r2(f.aL[0]) + ' ' + r2(f.aL[1]) + ')' });
+  set('w-armR', { cx: f.aR[0], cy: f.aR[1], transform: 'rotate(' + r2(f.aR[2]) + ' ' + r2(f.aR[0]) + ' ' + r2(f.aR[1]) + ')' });
+  set('w-bodyp', { d: f.bodyD }); set('w-rimr', { fill: f.rim });
+  set('w-h1', { cx: f.h1[0], cy: f.h1[1], transform: 'rotate(-30 ' + r2(f.h1[0]) + ' ' + r2(f.h1[1]) + ')' });
+  set('w-h2', { cx: f.h2[0], cy: f.h2[1], transform: 'rotate(-32 ' + r2(f.h2[0]) + ' ' + r2(f.h2[1]) + ')' });
+  set('w-h3', { cx: f.h3[0], cy: f.h3[1] });
+  set('w-cheekL', { cx: f.cL[0], rx: f.cL[1], cy: f.cy, opacity: f.blush }); set('w-cheekR', { cx: f.cR[0], rx: f.cR[1], cy: f.cy, opacity: f.blush });
+  set('w-eyeL', { d: f.eyeL }); set('w-eyeR', { d: f.eyeR });
+  set('w-g1', { cx: f.g1[0], cy: f.g1[1], opacity: f.gOp }); set('w-g2', { cx: f.g2[0], cy: f.g2[1], opacity: f.gOp });
+  set('w-k1', { cx: f.k1[0], cy: f.k1[1], opacity: f.gOp }); set('w-k2', { cx: f.k2[0], cy: f.k2[1], opacity: f.gOp });
+  set('w-mouth', { d: f.mouthD, 'fill-opacity': f.mFill });
+  for (var n in f.sym) set('w-' + n, { opacity: cl(f.sym[n], 0, 1) });
+}
+
+// ---------- Controlli ----------
+function buttons(id, list, key) {
+  var box = $(id);
+  list.forEach(function (x, i) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = x.label;
+    b.addEventListener('click', function () { ui[key] = i; refresh(); });
+    box.appendChild(b);
+  });
+  function refresh() { Array.prototype.forEach.call(box.children, function (b, i) { b.setAttribute('aria-pressed', String(i === ui[key])); }); }
+  refresh();
+}
+buttons('states', STATES, 'sel'); buttons('palettes', PALS, 'pal');
+
+// ---------- Loop ----------
+var last = performance.now();
+function loop(now) {
+  var dt = Math.min(0.033, Math.max(0.001, (now - last) / 1000)); last = now;
+  if (!document.hidden) apply(step(dt));
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

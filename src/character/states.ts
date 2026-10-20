@@ -2,8 +2,9 @@
 // The backend decides the state; this file only says how to draw it.
 
 import type { Palette } from './colors';
+import type { WispState } from './params';
 
-export type WispState = 'focused' | 'distracted' | 'break' | 'waiting' | 'done' | 'night';
+export type { WispState };
 
 export type Eyes = 'dot' | 'side' | 'wide' | 'tired' | 'happy' | 'closed';
 export type Mouth = 'calm' | 'wavy' | 'flat' | 'o' | 'grin' | 'sleep';
