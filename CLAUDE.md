@@ -59,7 +59,7 @@ local.
   frames); closed = click-through, Rust polls the cursor every 20 ms. The closed bar must
   never hide what is underneath (e.g. a browser tab's close button): with the cursor on it
   or within 24 px it fades to 15% (`.peek`), and the island opens only after the cursor
-  rests 500 ms on the bar (owner asked for a bit longer than 350 ms); a mouse click on the closed bar goes to the window below and
+  rests 700 ms on the bar (owner asked for longer twice: 350, then 500 ms); a mouse click on the closed bar goes to the window below and
   blocks opening until the cursor leaves the bar (`HoverTracker`, `Platform::mouse_button_down`).
   Once open, clicks are re-enabled and CSS animates the black shape (spring open, smooth
   close). Closes 80 ms after the cursor leaves (owner found the brief's 600 ms too slow).

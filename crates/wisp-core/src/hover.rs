@@ -11,7 +11,7 @@
 use std::time::{Duration, Instant};
 
 /// How long the cursor must rest on the closed bar before the island opens.
-pub const OPEN_DELAY: Duration = Duration::from_millis(500);
+pub const OPEN_DELAY: Duration = Duration::from_millis(700);
 
 /// How far around the closed bar (logical pixels) the cursor makes it fade.
 pub const NEAR_MARGIN: f64 = 24.0;
