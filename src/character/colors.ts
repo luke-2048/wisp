@@ -1,4 +1,4 @@
-// Wisp's palettes and the colour maths that derives every shade from a base colour.
+// Wisp's palettes and colour maths. geometry.ts derives every body shade from one base colour.
 
 export type PaletteName = 'lilla' | 'menta' | 'pesca';
 
@@ -51,25 +51,6 @@ export function mix(from: string, to: string, t: number): string {
   const b = toRgb(to);
   const channel = (i: number) => Math.round(a[i] + (b[i] - a[i]) * t);
   return toHex([channel(0), channel(1), channel(2)]);
-}
-
-/** The body shades used by the gradients, all derived from one base colour. */
-export interface BodyColors {
-  base: string;
-  highlight: string;
-  shade: string;
-  glow: string; // warm light through the bottom of the body
-  rim: string;
-}
-
-export function bodyColors(base: string, palette: Palette): BodyColors {
-  return {
-    base,
-    highlight: mix(base, WHITE, 0.65),
-    shade: mix(base, palette.shadow, 0.5),
-    glow: mix(base, palette.warm, 0.7),
-    rim: mix(base, WHITE, 0.75),
-  };
 }
 
 export function toRgb(hex: string): Rgb {

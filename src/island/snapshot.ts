@@ -1,5 +1,5 @@
 import type { PaletteName } from '../character/colors';
-import type { WispState } from '../character/states';
+import type { WispState } from '../character/params';
 
 // What the backend sends in `wisp://state` (Snapshot in src-tauri/src/app_state.rs).
 

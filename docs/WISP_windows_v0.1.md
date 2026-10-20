@@ -111,6 +111,8 @@ Priorità se più regole sono vere: `done` > `waiting` > `night` > `break` > `di
 
 ## Il personaggio: Wisp
 
+> **Aggiornato dopo la v0.1.0** (vedi `docs/WISP_personaggio.md` e `docs/wisp-reference.html`): Wisp ora è animato con **molle smorzate** in `src/character/` (`spring`, `params`, `geometry`, `sim`, `input`, `render`, `loop`, `index`). Strati, colori e palette qui sotto valgono ancora. Le varianti fisse di occhi e bocca sono diventate **forme continue** calcolate da pochi parametri (`open`, `happy`, `smile`, `mouthOpen`…), con i valori degli stati in `params.ts`. Wisp segue il cursore con lo sguardo su tutto lo schermo (evento `wisp://cursor` da Rust). Nell'isola aperta si clicca, si tira giù come un elastico (circa 40 px) e si accarezza; il mini Wisp della barra chiusa guarda e cambia espressione. Per calibrarlo c'è `playground.html` (solo sviluppo).
+
 Base grafica: `assets/wisp.svg` (stato Concentrato, palette Lilla, viewBox 120×120). Costruiscilo come **componente SVG parametrico**: stessi elementi, cambiano solo gli attributi in base allo stato. Lo stile è **pseudo-3D morbido**, come un mochi.
 
 **Strati, dal basso:**
@@ -149,7 +151,7 @@ Inchiostro di occhi e bocca: #2A2433. Guance: #FF8FA3.
 
 L'idea da preservare: **quando mi distraggo Wisp diventa trasparente**, come se sparisse insieme alla mia attenzione. La faccia resta visibile.
 
-**Animazioni:** galleggiamento ±3 px in 3.2 s ease-in-out, con l'ombra che pulsa in sincrono; transizioni tra stati di circa 300 ms; battito di ciglia casuale ogni 3–6 s con occhi aperti; con `prefers-reduced-motion` niente galleggiamento né battiti.
+**Animazioni:** ogni parte insegue il suo obiettivo con una molla, quindi le transizioni non hanno scatti. Galleggiamento ±3 unità in 3.2 s (più lento e basso di notte), ombra che si rimpicciolisce quando sale, battito di ciglia ogni 2.5–6 s, occhiate e saltelli quando è lasciato stare. Con `prefers-reduced-motion` niente galleggiamento, saltelli né battiti, ma le espressioni cambiano comunque. Il loop si ferma quando la finestra è nascosta.
 
 ## Fuori dalla v0.1 (non implementarli, ma non chiudere la porta)
 

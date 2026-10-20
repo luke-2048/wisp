@@ -19,6 +19,18 @@ Product brief: `docs/WISP_windows_v0.1.md` (Italian). Read it before changing be
   never `now()` inside the logic.
 - OS-specific code goes in `src-tauri/src/platform/` behind a common interface.
 - `src-tauri/src/integrations/` holds the `Integration` trait only (v0.1).
+- **The character** (`src/character/`, brief: `docs/WISP_personaggio.md`, behaviour
+  reference: `docs/wisp-reference.html`) is driven by damped springs: the app changes
+  _targets_, never values. `spring.ts`, `params.ts` (STATES, REACTIONS, ATTENTION, spring
+  tuning), `geometry.ts` (pure: pose → SVG attributes) and `sim.ts` (no DOM; time and
+  randomness passed in) are tested with Vitest. `render.ts` builds the SVG once and only
+  sets changed attributes; `loop.ts` stops while the window is hidden; `input.ts` handles
+  click, drag and caress. Use only `createWisp` / `renderStill` from `index.ts`.
+  `playground.html` (dev only, not in the build) is for tuning:
+  `http://localhost:1420/playground.html`.
+- Wisp's gaze is not app state, so the frontend may follow the cursor: Rust sends
+  `wisp://cursor` (window-relative CSS pixels) from the island polling thread every 40 ms,
+  only when the cursor moved and the island is visible.
 
 ## Product rules (binding)
 
@@ -48,9 +60,15 @@ local.
   re-enabled and CSS animates the black shape (spring open, smooth close). Closes 80 ms
   after the cursor leaves (owner found the brief's 600 ms too slow).
 - Closed island is only the 240x30 bar (owner's choice, overrides the brief's "Wisp peeks
-  from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp blinks
-  and glows softly (`.attention`) only when it has something to say (waiting, break,
-  done). Step 3 (hover) was done before step 2 (states).
+  from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp glows
+  softly or blinks red (`data-attention`, from `ATTENTION`) only when it has something to
+  say (waiting, break, done). Step 3 (hover) was done before step 2 (states).
+- Character in the island: the 24 px mini Wisp only follows the gaze and changes
+  expression (the closed bar lets clicks through); click, elastic (~40 px down) and caress
+  work on the 150 px Wisp in the open panel. At night, a nearby cursor makes it peek with
+  the left eye only (`wink`). The sharp highlight is softer than in the reference (0.65)
+  and all highlights are clipped to the body (owner's choice). Park and settings icons
+  are still (`renderStill`).
 - Default palette Lilla; Menta and Pesca selectable in settings.
 - The island is **always top centre** (owner's rule): no "bottom right" position setting,
   although the brief mentions one.

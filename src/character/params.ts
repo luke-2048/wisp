@@ -253,6 +253,23 @@ export const DEFAULT_TUNING: Tuning = {
   turn: 1,
 };
 
+/**
+ * How the mini Wisp in the closed bar calls you (island.css draws it):
+ * - 'soft': a slow glow in the palette colour (break, done);
+ * - 'alert': a red blink, only when the timer has ended (owner's choice: the
+ *   mini Wisp is small, a soft glow is easy to miss).
+ */
+export type Attention = 'none' | 'soft' | 'alert';
+
+export const ATTENTION: Record<WispState, Attention> = {
+  focused: 'none',
+  distracted: 'none',
+  break: 'soft',
+  waiting: 'alert',
+  done: 'soft',
+  night: 'none',
+};
+
 /** The full expression (face plus symbols) a state asks for. */
 export function stateExpression(state: WispState): Expression {
   const look = STATES[state];

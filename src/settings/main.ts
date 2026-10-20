@@ -1,7 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import { palettes, type PaletteName } from '../character/colors';
-import { applyState, renderWisp } from '../character/wisp';
+import { renderStill, type PaletteName } from '../character';
 import { it } from '../i18n/it';
 import type { Settings, Snapshot } from '../island/snapshot';
 import { shortcutLabel } from '../shared/shortcut';
@@ -16,7 +15,7 @@ const app = document.querySelector<HTMLDivElement>('#app');
 if (app) {
   app.innerHTML = `
     <header>
-      <span class="logo">${renderWisp({ id: 'logo', mini: true })}</span>
+      <span class="logo"></span>
       <h1>${t.title}</h1>
     </header>
 
@@ -27,7 +26,7 @@ if (app) {
         ${PALETTES.map(
           (name) => `
           <button class="palette" data-palette="${name}">
-            <span class="swatch">${renderWisp({ id: `swatch-${name}`, mini: true })}</span>
+            <span class="swatch"></span>
             <span>${t.palettes[name]}</span>
           </button>`,
         ).join('')}
@@ -82,17 +81,18 @@ function setup(root: HTMLElement) {
 
   // Paint each swatch in its own palette, the logo in the chosen one.
   for (const name of PALETTES) {
-    applyState(
-      root.querySelector(`.palette[data-palette="${name}"] svg`)!,
-      'focused',
-      palettes[name],
-    );
+    const swatch = root.querySelector<HTMLSpanElement>(`.palette[data-palette="${name}"] .swatch`)!;
+    renderStill(swatch, { palette: name, size: 38 });
   }
-  const logo = root.querySelector<SVGSVGElement>('.logo svg')!;
+  const logo = root.querySelector<HTMLSpanElement>('.logo')!;
+  let logoPalette: PaletteName | null = null;
 
   const draw = (settings: Settings) => {
     current = settings;
-    applyState(logo, 'focused', palettes[settings.palette]);
+    if (settings.palette !== logoPalette) {
+      logoPalette = settings.palette;
+      renderStill(logo, { palette: settings.palette, size: 34 });
+    }
     for (const button of root.querySelectorAll<HTMLButtonElement>('.palette')) {
       button.classList.toggle('chosen', button.dataset.palette === settings.palette);
     }

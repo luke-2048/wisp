@@ -488,8 +488,6 @@ input.chip {
   opacity: 0.5;
 }
 
-/* Wisp itself is styled in src/character/wisp.css. */
-
 @media (prefers-reduced-motion: reduce) {
   .shape,
   .island.open .shape,

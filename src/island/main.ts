@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { createWisp } from '../character';
 import { palettes, type PaletteName } from '../character/colors';
-import { looks, type WispState } from '../character/states';
+import { ATTENTION, type WispState } from '../character/params';
 import { it } from '../i18n/it';
 import './island.css';
 import { panelHtml, setupPanel } from './panel';
@@ -90,7 +90,7 @@ if (app) {
       wisp.setState(snapshot.state);
     }
     // 'none' | 'soft' | 'alert': island.css makes the closed bar call you.
-    island.dataset.attention = looks[snapshot.state].attention;
+    island.dataset.attention = ATTENTION[snapshot.state];
 
     // A sound only when the state changes, never for the first snapshot.
     if (previous !== null && previous !== snapshot.state) {

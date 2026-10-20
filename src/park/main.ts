@@ -1,8 +1,7 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { palettes } from '../character/colors';
-import { applyState, renderWisp } from '../character/wisp';
+import { renderStill, type PaletteName } from '../character';
 import { it } from '../i18n/it';
 import type { Snapshot } from '../island/snapshot';
 import './park.css';
@@ -15,19 +14,24 @@ const app = document.querySelector<HTMLDivElement>('#app');
 if (app) {
   app.innerHTML = `
     <div class="park">
-      <span class="icon">${renderWisp({ id: 'park', mini: true })}</span>
+      <span class="icon"></span>
       <input class="field" type="text" maxlength="500" placeholder="${it.park.placeholder}"
         aria-label="${it.park.title}" spellcheck="false" />
       <span class="hint">${it.park.hint} ↵</span>
     </div>`;
 
   // The icon follows the palette chosen in the settings.
-  const icon = app.querySelector<SVGSVGElement>('svg.wisp')!;
-  const paint = (snapshot: Snapshot) =>
-    applyState(icon, 'focused', palettes[snapshot.settings.palette]);
-  applyState(icon, 'focused', palettes.lilla);
-  void invoke<Snapshot>('current_snapshot').then(paint);
-  void listen<Snapshot>('wisp://state', (event) => paint(event.payload));
+  // It stays still: this window is about typing fast, not about Wisp.
+  const icon = app.querySelector<HTMLSpanElement>('.icon')!;
+  let shown: PaletteName | null = null;
+  const paint = (palette: PaletteName) => {
+    if (palette === shown) return;
+    shown = palette;
+    renderStill(icon, { palette, size: 30 });
+  };
+  paint('lilla');
+  void invoke<Snapshot>('current_snapshot').then((s) => paint(s.settings.palette));
+  void listen<Snapshot>('wisp://state', (event) => paint(event.payload.settings.palette));
 
   const field = app.querySelector<HTMLInputElement>('.field')!;
 
