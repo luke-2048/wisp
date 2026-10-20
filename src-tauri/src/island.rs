@@ -11,7 +11,7 @@ use tauri::{
     AppHandle, Emitter, LogicalSize, Manager, PhysicalPosition, PhysicalRect, PhysicalSize,
     WebviewWindow,
 };
-use wisp_core::hover::{HoverAction, HoverTracker};
+use wisp_core::hover::{Cursor, HoverAction, HoverTracker, NEAR_MARGIN};
 
 use crate::{
     app_state,
@@ -59,6 +59,8 @@ const POLLS_PER_CURSOR_EVENT: u32 = 2;
 #[derive(Clone, Serialize)]
 struct IslandEvent {
     open: bool,
+    /// Closed, with the cursor near: the bar fades so you see what's underneath.
+    peek: bool,
 }
 
 /// Cursor position in logical pixels, relative to the island window's top-left
@@ -195,6 +197,16 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
 
     // The braces limit how long we hold the lock: it is released at `}`,
     // before we touch the window.
+    // The closed bar plus a margin on the sides and below: the "near" zone.
+    let near_size = LogicalSize {
+        width: BAR_SIZE.width + 2.0 * NEAR_MARGIN,
+        height: BAR_SIZE.height + NEAR_MARGIN,
+    };
+    let near = Zone::top_centre(window_area, near_size.to_physical(scale)).contains(cursor);
+    let pressed = platform::current().mouse_button_down();
+
+    // The braces limit how long we hold the lock: it is released at `}`,
+    // before we touch the window.
     let action = {
         let mut tracker = tracker(app);
         let shape = if tracker.is_expanded() {
@@ -203,23 +215,32 @@ fn follow_cursor(app: &AppHandle) -> tauri::Result<()> {
             BAR_SIZE
         };
         let zone = Zone::top_centre(window_area, shape.to_physical(scale));
-        tracker.update(zone.contains(cursor), Instant::now())
+        let state = Cursor {
+            inside: zone.contains(cursor),
+            near,
+            pressed,
+        };
+        tracker.update(state, Instant::now())
     };
+    let event = |open, peek| app.emit(ISLAND_EVENT, IslandEvent { open, peek });
 
     match action {
         Some(HoverAction::Expand) => {
             platform::current().set_click_through(&window, false)?;
-            app.emit(ISLAND_EVENT, IslandEvent { open: true })?;
+            event(true, false)?;
             app_state::island_seen(app);
         }
         Some(HoverAction::Collapse) => {
-            app.emit(ISLAND_EVENT, IslandEvent { open: false })?;
+            event(false, false)?;
             // If the timer ended while it was open, the user has seen it.
             app_state::island_seen(app);
         }
         Some(HoverAction::Shrink) => {
             platform::current().set_click_through(&window, true)?;
         }
+        // The window stays click-through: only the look changes.
+        Some(HoverAction::Peek) => event(false, true)?,
+        Some(HoverAction::Unpeek) => event(false, false)?,
         None => {}
     }
     Ok(())

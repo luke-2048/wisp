@@ -25,6 +25,14 @@ body {
   justify-content: center;
   width: 100vw;
   height: 100vh;
+  transition: opacity 120ms ease-out;
+}
+
+/* Cursor near the closed bar: it steps aside (almost transparent) so you can
+   see and click what is underneath, e.g. a browser tab. Clicks already pass
+   through; the island opens only if the cursor rests on the bar (Rust). */
+.island.peek:not(.open) {
+  opacity: 0.15;
 }
 
 /* One black shape that grows from the bar into the panel. */
@@ -489,6 +497,7 @@ input.chip {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .island,
   .shape,
   .island.open .shape,
   .bar,

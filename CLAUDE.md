@@ -56,9 +56,13 @@ local.
   timer ends, a bright arpeggio for "Fatto!". `additionalBrowserArgs` in tauri.conf.json
   allows WebView2 to play them without a prior click.
 - Island window: always 580x266 and never resized (resizing a WebView mid-animation drops
-  frames); closed = click-through, Rust polls the cursor every 20 ms; on hover clicks are
-  re-enabled and CSS animates the black shape (spring open, smooth close). Closes 80 ms
-  after the cursor leaves (owner found the brief's 600 ms too slow).
+  frames); closed = click-through, Rust polls the cursor every 20 ms. The closed bar must
+  never hide what is underneath (e.g. a browser tab's close button): with the cursor on it
+  or within 24 px it fades to 15% (`.peek`), and the island opens only after the cursor
+  rests 350 ms on the bar; a mouse click on the closed bar goes to the window below and
+  blocks opening until the cursor leaves the bar (`HoverTracker`, `Platform::mouse_button_down`).
+  Once open, clicks are re-enabled and CSS animates the black shape (spring open, smooth
+  close). Closes 80 ms after the cursor leaves (owner found the brief's 600 ms too slow).
 - Closed island is only the 240x30 bar (owner's choice, overrides the brief's "Wisp peeks
   from under the bar"): mini Wisp on the left, minutes on the right. The mini Wisp glows
   softly or blinks red (`data-attention`, from `ATTENTION`) only when it has something to

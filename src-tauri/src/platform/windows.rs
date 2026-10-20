@@ -4,6 +4,7 @@ use super::{ForeignWindow, Platform};
 use tauri::{PhysicalPosition, PhysicalRect, PhysicalSize, WebviewWindow};
 use windows::Win32::{
     Foundation::HWND,
+    UI::Input::KeyboardAndMouse::{GetAsyncKeyState, VK_LBUTTON, VK_RBUTTON},
     UI::WindowsAndMessaging::{
         GetForegroundWindow, LWA_ALPHA, SetForegroundWindow, SetLayeredWindowAttributes,
     },
@@ -50,6 +51,14 @@ impl Platform for WindowsPlatform {
         // was closed meanwhile, the call simply fails and nothing happens.
         let hwnd = HWND(window.0 as *mut std::ffi::c_void);
         let _ = unsafe { SetForegroundWindow(hwnd) };
+    }
+
+    fn mouse_button_down(&self) -> bool {
+        // The highest bit of the answer is set while the key is down. The
+        // codes are the physical buttons, so swapped buttons don't matter here.
+        // SAFETY: it only reads the current state of a key.
+        let down = |key: i32| unsafe { GetAsyncKeyState(key) } < 0;
+        down(VK_LBUTTON.0.into()) || down(VK_RBUTTON.0.into())
     }
 }
 

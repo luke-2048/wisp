@@ -113,8 +113,10 @@ if (app) {
   // Ask the backend for the real snapshot (Wisp starts as 'focused').
   void invoke<Snapshot>('current_snapshot').then(show);
   void listen<Snapshot>('wisp://state', (event) => show(event.payload));
-  void listen<{ open: boolean }>('wisp://island', (event) => {
+  void listen<{ open: boolean; peek: boolean }>('wisp://island', (event) => {
     island.classList.toggle('open', event.payload.open);
+    // The cursor is near the closed bar: it fades so you can see and click what's underneath.
+    island.classList.toggle('peek', event.payload.peek);
     // Next time it opens on task and timer, once the closing animation is over.
     if (!event.payload.open) window.setTimeout(() => panel.reset(), 400);
   });

@@ -33,6 +33,10 @@ pub trait Platform {
 
     /// Gives the focus back to a window remembered earlier.
     fn focus_window(&self, window: ForeignWindow);
+
+    /// True while the left or right mouse button is held down, anywhere on
+    /// screen (also over other apps' windows).
+    fn mouse_button_down(&self) -> bool;
 }
 
 /// The platform Wisp is running on.
