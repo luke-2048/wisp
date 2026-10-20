@@ -36,7 +36,7 @@ const home = app.querySelector<HTMLDivElement>('.home')!;
 const [stateRow, paletteRow] = app.querySelectorAll<HTMLDivElement>('.row');
 const tuningBox = app.querySelector<HTMLFieldSetElement>('.tuning')!;
 
-const wisp = createWisp(home, { palette: 'lilla', size: SIZE, mode: 'free' });
+const wisp = createWisp(home, { palette: 'lilla', size: SIZE, mode: 'free', area: stage });
 
 /** Free mode: Wisp can be dragged anywhere inside the stage. */
 function updateBounds() {

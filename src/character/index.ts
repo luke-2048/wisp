@@ -5,6 +5,7 @@
 
 import { palettes, type PaletteName } from './colors';
 import { frame } from './geometry';
+import { attachPointer } from './input';
 import { startLoop } from './loop';
 import type { WispState } from './params';
 import { createRenderer } from './render';
@@ -24,6 +25,10 @@ export interface WispOptions {
   compact?: boolean;
   /** Initial state, so the first frame is already right. */
   state?: WispState;
+  /** Where pointer movement counts (petting, nearby); defaults to Wisp's own box. */
+  area?: HTMLElement;
+  /** False for a Wisp that only looks around (the closed bar lets clicks through). */
+  interactive?: boolean;
 }
 
 export interface Wisp {
@@ -60,6 +65,22 @@ export function createWisp(container: HTMLElement, options: WispOptions): Wisp {
   sim.elastic = ELASTIC_PX / renderer.pixelsPerUnit();
   container.append(renderer.root);
 
+  // Page pixels → scene units around Wisp's home (the centre of its box).
+  const toScene = (x: number, y: number) => {
+    const box = renderer.root.getBoundingClientRect();
+    const u = renderer.pixelsPerUnit();
+    return { x: (x - box.left - box.width / 2) / u, y: (y - box.top - box.height / 2) / u };
+  };
+  const detach =
+    options.interactive === false
+      ? () => {}
+      : attachPointer(sim, {
+          area: options.area ?? renderer.root,
+          target: renderer.svg,
+          toScene,
+          forgetOnLeave: options.mode === 'free',
+        });
+
   const onMotionChange = () => (sim.reducedMotion = motion.matches);
   motion.addEventListener('change', onMotionChange);
 
@@ -79,13 +100,7 @@ export function createWisp(container: HTMLElement, options: WispOptions): Wisp {
       sim.palette = palettes[palette];
     },
     setLookTarget(x, y) {
-      // Page pixels → scene units around Wisp's home (the centre of its box).
-      const box = renderer.root.getBoundingClientRect();
-      const u = renderer.pixelsPerUnit();
-      sim.input.pointer = {
-        x: (x - box.left - box.width / 2) / u,
-        y: (y - box.top - box.height / 2) / u,
-      };
+      sim.input.pointer = toScene(x, y);
       sim.input.lastMove = sim.time;
     },
     poke() {
@@ -93,6 +108,7 @@ export function createWisp(container: HTMLElement, options: WispOptions): Wisp {
     },
     destroy() {
       loop.stop();
+      detach();
       motion.removeEventListener('change', onMotionChange);
       renderer.root.remove();
     },

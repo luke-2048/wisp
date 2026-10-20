@@ -33,6 +33,10 @@ export interface InputState {
   dragging: boolean;
   /** Where Wisp was grabbed, relative to its centre. */
   grab: Vec;
+  /** Where the button went down. */
+  down: Vec;
+  /** Previous horizontal pointer position, to measure petting. */
+  previousX: number;
   /** Horizontal movement over Wisp, decaying: enough of it is a caress. */
   petting: number;
 }
@@ -85,6 +89,8 @@ export class Sim {
     pressed: false,
     dragging: false,
     grab: { x: 0, y: 0 },
+    down: { x: 0, y: 0 },
+    previousX: 0,
     petting: 0,
   };
 
