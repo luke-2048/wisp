@@ -46,7 +46,7 @@
       {
         "label": "settings",
         "url": "settings.html",
-        "title": "Impostazioni di Wisp",
+        "title": "Wisp settings",
         "width": 440,
         "height": 640,
         "resizable": false,

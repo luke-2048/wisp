@@ -17,7 +17,7 @@ system notifications — Wisp changes mood instead. Everything stays on your com
 - **The island.** A black bar at the top centre of the screen, with a tiny Wisp and the
   minutes left. Hover it and it opens: the current task, the timer and your parked ideas.
   When closed it never steals clicks or focus.
-- **One task at a time.** Click "Su cosa stai lavorando?", type, Enter. "Fatto" celebrates,
+- **One task at a time.** Click "What are you working on?", type, Enter. "Done" celebrates,
   saves it to the history and stops the timer.
 - **Focus timer.** 15, 25, 45 minutes or your own. When it ends Wisp rings softly and the
   bar blinks until you look at it.
@@ -25,7 +25,7 @@ system notifications — Wisp changes mood instead. Everything stays on your com
   are back where you were. The ideas wait in the island, with date and time.
 - **Wisp's moods.** Focused, break (after 90 minutes of focus), waiting (timer over), done,
   night (23:00–05:00). Distracted is reserved for a future version.
-- **Settings** from the tray: colour (Lilla, Menta, Pesca), shortcut, durations, night
+- **Settings** from the tray: colour (Lilac, Mint, Peach), shortcut, durations, night
   hours. Saved as you change them.
 
 Everything is stored locally in `%APPDATA%\app.wisp.focus\wisp.sqlite3`.

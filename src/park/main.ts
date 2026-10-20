@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { renderStill, type PaletteName } from '../character';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import type { Snapshot } from '../island/snapshot';
 import './park.css';
 
@@ -15,9 +15,9 @@ if (app) {
   app.innerHTML = `
     <div class="park">
       <span class="icon"></span>
-      <input class="field" type="text" maxlength="500" placeholder="${it.park.placeholder}"
-        aria-label="${it.park.title}" spellcheck="false" />
-      <span class="hint">${it.park.hint} ↵</span>
+      <input class="field" type="text" maxlength="500" placeholder="${en.park.placeholder}"
+        aria-label="${en.park.title}" spellcheck="false" />
+      <span class="hint">${en.park.hint} ↵</span>
     </div>`;
 
   // The icon follows the palette chosen in the settings.

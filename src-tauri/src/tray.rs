@@ -16,7 +16,7 @@ const AUTOSTART: &str = "autostart";
 const QUIT: &str = "quit";
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
-    let text = i18n::italian();
+    let text = i18n::english();
     let autostart_on = app.autolaunch().is_enabled().unwrap_or(false);
 
     let show_hide = MenuItem::with_id(app, SHOW_HIDE, &text.tray.show_hide, true, None::<&str>)?;

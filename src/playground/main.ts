@@ -5,7 +5,7 @@
 import { createWisp, type PaletteName, type WispState } from '../character';
 import { palettes } from '../character/colors';
 import { DEFAULT_TUNING, WISP_STATES, type Tuning } from '../character/params';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import './playground.css';
 
 /** Stage background per palette, from the reference page. */
@@ -20,7 +20,7 @@ type SpringName = 'expression' | 'look' | 'home' | 'squash';
 const SPRINGS: SpringName[] = ['expression', 'look', 'home', 'squash'];
 
 const app = document.querySelector<HTMLDivElement>('#app')!;
-const text = it.playground;
+const text = en.playground;
 app.innerHTML = `
   <main>
     <h1>${text.title}</h1>
@@ -77,13 +77,13 @@ function buttons<T extends string>(
 buttons<WispState>(
   stateRow,
   [...WISP_STATES],
-  (s) => it.states[s],
+  (s) => en.states[s],
   (s) => wisp.setState(s),
 );
 buttons<PaletteName>(
   paletteRow,
   Object.keys(palettes) as PaletteName[],
-  (p) => it.settings.palettes[p],
+  (p) => en.settings.palettes[p],
   (p) => {
     wisp.setPalette(p);
     stage.style.background = BACKGROUNDS[p];

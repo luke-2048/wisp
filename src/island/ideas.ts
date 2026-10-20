@@ -2,18 +2,18 @@
 // time; each can be marked as seen or deleted. The backend owns the list.
 
 import { invoke } from '@tauri-apps/api/core';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import type { ParkedIdea } from './snapshot';
 
 export function ideasHtml(): string {
   return `
     <div class="ideas-view">
       <div class="ideas-head">
-        <button class="back">‹ ${it.ideas.back}</button>
-        <span class="label">${it.ideas.title}</span>
+        <button class="back">‹ ${en.ideas.back}</button>
+        <span class="label">${en.ideas.title}</span>
       </div>
       <ul class="ideas-list"></ul>
-      <div class="ideas-empty">${it.ideas.empty}</div>
+      <div class="ideas-empty">${en.ideas.empty}</div>
     </div>`;
 }
 
@@ -50,9 +50,9 @@ function ideaItem(idea: ParkedIdea): HTMLLIElement {
   meta.append(when);
 
   if (!idea.seen) {
-    meta.append(action(it.ideas.seen, () => invoke('idea_seen', { id: idea.id })));
+    meta.append(action(en.ideas.seen, () => invoke('idea_seen', { id: idea.id })));
   }
-  meta.append(action(it.ideas.delete, () => invoke('idea_delete', { id: idea.id })));
+  meta.append(action(en.ideas.delete, () => invoke('idea_delete', { id: idea.id })));
 
   item.append(text, meta);
   return item;
@@ -66,13 +66,13 @@ function action(label: string, run: () => Promise<unknown>): HTMLButtonElement {
   return button;
 }
 
-/** "oggi, 14:32" or "16 ott, 14:32". */
+/** "today, 14:32" or "16 Oct, 14:32" (24-hour clock). */
 function formatWhen(ms: number): string {
   const date = new Date(ms);
-  const time = date.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  const time = date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
   const today = new Date().toDateString() === date.toDateString();
   const day = today
-    ? it.ideas.today
-    : date.toLocaleDateString('it-IT', { day: 'numeric', month: 'short' });
+    ? en.ideas.today
+    : date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   return `${day}, ${time}`;
 }

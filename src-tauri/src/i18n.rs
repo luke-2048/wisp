@@ -1,6 +1,6 @@
 //! UI text needed by the Rust side (the tray menu).
 //!
-//! The Italian strings live in `src/i18n/it.json`, shared with the frontend,
+//! The English strings live in `src/i18n/en.json`, shared with the frontend,
 //! so there is a single place to edit them.
 
 use std::collections::HashMap;
@@ -9,7 +9,7 @@ use serde::Deserialize;
 use wisp_core::models::WispState;
 
 /// The JSON file is copied into the binary at compile time.
-const IT_JSON: &str = include_str!("../../src/i18n/it.json");
+const EN_JSON: &str = include_str!("../../src/i18n/en.json");
 
 #[derive(Deserialize)]
 pub struct Strings {
@@ -18,7 +18,7 @@ pub struct Strings {
 }
 
 impl Strings {
-    /// Italian name of a state, e.g. "Fai una pausa".
+    /// Display name of a state, e.g. "Take a break".
     // Only the debug menu uses it for now.
     #[cfg_attr(not(debug_assertions), allow(dead_code))]
     pub fn state_name(&self, state: WispState) -> &str {
@@ -43,10 +43,10 @@ pub struct TrayStrings {
     pub automatic: String,
 }
 
-/// Parses the Italian strings. The file ships inside the binary and a test
+/// Parses the English strings. The file ships inside the binary and a test
 /// checks it, so a failure here is a programming error, hence `expect`.
-pub fn italian() -> Strings {
-    serde_json::from_str(IT_JSON).expect("src/i18n/it.json is malformed")
+pub fn english() -> Strings {
+    serde_json::from_str(EN_JSON).expect("src/i18n/en.json is malformed")
 }
 
 #[cfg(test)]
@@ -54,16 +54,16 @@ mod tests {
     use super::*;
 
     #[test]
-    fn italian_strings_parse() {
-        assert_eq!(italian().tray.quit, "Esci");
+    fn english_strings_parse() {
+        assert_eq!(english().tray.quit, "Quit");
     }
 
     #[test]
-    fn every_state_has_an_italian_name() {
-        let strings = italian();
+    fn every_state_has_a_name() {
+        let strings = english();
         for state in WispState::ALL {
             assert!(strings.states.contains_key(state.id()), "{state:?}");
         }
-        assert_eq!(strings.state_name(WispState::Break), "Fai una pausa");
+        assert_eq!(strings.state_name(WispState::Break), "Take a break");
     }
 }

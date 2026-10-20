@@ -44,7 +44,7 @@ local.
   least 5 min resets the count.
 - `night` runs from 23:00 to 05:00 (both configurable).
 - The focus streak (for `break`) is running timer time; it resets only after 5 min with no
-  timer running. "Fatto" also stops the timer (owner's choice).
+  timer running. "Done" ("Fatto" in the brief) also stops the timer (owner's choice).
 - "Ti aspetta" clears when the island is opened or closed (either way the user saw it).
 - Timer over ("Ti aspetta"): the closed bar blinks red (edge, mini Wisp, dot). This is the
   only red in the app, an explicit exception to "no aggressive red" asked by the owner.
@@ -73,7 +73,8 @@ local.
   the left eye only (`wink`). The sharp highlight is softer than in the reference (0.65)
   and all highlights are clipped to the body (owner's choice). Park and settings icons
   are still (`renderStill`).
-- Default palette Lilla; Menta and Pesca selectable in settings.
+- Default palette Lilla; Menta and Pesca selectable in settings (shown as Lilac, Mint,
+  Peach; the ids stay Italian because they are stored in the database).
 - The island is **always top centre** (owner's rule): no "bottom right" position setting,
   although the brief mentions one.
 - Settings are saved on every change (no Save button); Rust sanitises them
@@ -87,9 +88,10 @@ local.
 
 ## Conventions
 
-- Code, identifiers and comments in **English**; UI text in **Italian**, only in
-  `src/i18n/it.json` (typed for the frontend by `it.ts`, read by Rust in
-  `src-tauri/src/i18n.rs` for the tray menu).
+- Code, identifiers, comments and **UI text in English** (owner's choice after v0.1.0; the
+  briefs in `docs/` and the conversation with the owner stay in Italian). UI text lives
+  only in `src/i18n/en.json` (typed for the frontend by `en.ts`, read by Rust in
+  `src-tauri/src/i18n.rs` for the tray menu). Dates use `en-GB` (24-hour clock).
 - Closed island click-through goes through `Platform::set_click_through`: on Windows a
   click-through window is layered and stays invisible unless its opacity is set.
 - Frontend: Vite + plain TypeScript + SVG, no UI framework.

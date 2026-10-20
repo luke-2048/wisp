@@ -4,7 +4,7 @@
 // when the backend answers with a new snapshot.
 
 import { invoke } from '@tauri-apps/api/core';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import { shortcutLabel } from '../shared/shortcut';
 import { ideasHtml, setupIdeas } from './ideas';
 import type { Snapshot } from './snapshot';
@@ -13,33 +13,33 @@ const QUICK_MINUTES = [15, 25, 45];
 
 export function panelHtml(): string {
   const quick = QUICK_MINUTES.map(
-    (m) => `<button class="chip" data-minutes="${m}">${m} ${it.island.minutes}</button>`,
+    (m) => `<button class="chip" data-minutes="${m}">${m} ${en.island.minutes}</button>`,
   ).join('');
   return `
     <div class="side" data-view="main">
     <div class="details" data-timer="idle">
-      <div class="label">${it.island.now}</div>
+      <div class="label">${en.island.now}</div>
       <div class="task-row">
-        <div class="task placeholder" tabindex="0">${it.island.taskPlaceholder}</div>
-        <input class="task-input" type="text" maxlength="200" placeholder="${it.island.taskPlaceholder}" hidden />
+        <div class="task placeholder" tabindex="0">${en.island.taskPlaceholder}</div>
+        <input class="task-input" type="text" maxlength="200" placeholder="${en.island.taskPlaceholder}" hidden />
       </div>
-      <div class="time">${it.island.noTime}</div>
+      <div class="time">${en.island.noTime}</div>
       <div class="progress"><div class="progress-fill"></div></div>
       <div class="controls">
         <div class="when-idle">
           ${quick}
-          <button class="chip other">${it.island.otherDuration}</button>
-          <input class="chip custom" type="number" min="1" max="240" placeholder="${it.island.minutes}" hidden />
+          <button class="chip other">${en.island.otherDuration}</button>
+          <input class="chip custom" type="number" min="1" max="240" placeholder="${en.island.minutes}" hidden />
         </div>
         <div class="when-active">
-          <button class="chip pause">${it.island.pause}</button>
-          <button class="chip resume">${it.island.resume}</button>
-          <button class="chip stop">${it.island.stop}</button>
+          <button class="chip pause">${en.island.pause}</button>
+          <button class="chip resume">${en.island.resume}</button>
+          <button class="chip stop">${en.island.stop}</button>
         </div>
-        <button class="chip done" disabled>${it.island.done}</button>
+        <button class="chip done" disabled>${en.island.done}</button>
       </div>
       <button class="ideas-link">
-        <span class="ideas-count">${it.ideas.none}</span>
+        <span class="ideas-count">${en.ideas.none}</span>
         <span class="ideas-hint"></span>
       </button>
     </div>
@@ -140,11 +140,11 @@ export function setupPanel(root: HTMLElement): Panel {
     draw(snapshot) {
       current = snapshot;
       details.dataset.timer = snapshot.timer.status;
-      task.textContent = snapshot.task ?? it.island.taskPlaceholder;
+      task.textContent = snapshot.task ?? en.island.taskPlaceholder;
       task.classList.toggle('placeholder', snapshot.task === null);
       done.disabled = snapshot.task === null;
       ideasCount.textContent = countText(snapshot);
-      ideasHint.textContent = `· ${it.ideas.hint.replace(
+      ideasHint.textContent = `· ${en.ideas.hint.replace(
         '{shortcut}',
         shortcutLabel(snapshot.settings.park_shortcut),
       )}`;
@@ -159,7 +159,7 @@ export function setupPanel(root: HTMLElement): Panel {
 /** "2 idee parcheggiate", counting only the ones not yet marked as seen. */
 function countText(snapshot: Snapshot): string {
   const unseen = snapshot.unseen_ideas;
-  if (unseen === 1) return it.ideas.one;
-  if (unseen > 1) return it.ideas.many.replace('{n}', String(unseen));
-  return snapshot.ideas.length > 0 ? it.ideas.noneNew : it.ideas.none;
+  if (unseen === 1) return en.ideas.one;
+  if (unseen > 1) return en.ideas.many.replace('{n}', String(unseen));
+  return snapshot.ideas.length > 0 ? en.ideas.noneNew : en.ideas.none;
 }

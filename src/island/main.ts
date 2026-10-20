@@ -3,7 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { createWisp } from '../character';
 import { palettes, type PaletteName } from '../character/colors';
 import { ATTENTION, type WispState } from '../character/params';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import './island.css';
 import { panelHtml, setupPanel } from './panel';
 import type { Snapshot } from './snapshot';
@@ -28,7 +28,7 @@ if (app) {
           <span class="mini"></span>
           <span class="timer">
             <span class="dot"></span>
-            <span class="minutes">${it.island.noTimer}</span>
+            <span class="minutes">${en.island.noTimer}</span>
           </span>
         </div>
         <div class="panel">
@@ -73,8 +73,8 @@ if (app) {
       timer.status === 'running'
         ? Math.max(0, timer.endsAt - performance.now())
         : timer.remainingMs;
-    minutes.textContent = idle ? it.island.noTimer : String(Math.ceil(remaining / 60_000));
-    time.textContent = idle ? it.island.noTime : formatTime(remaining);
+    minutes.textContent = idle ? en.island.noTimer : String(Math.ceil(remaining / 60_000));
+    time.textContent = idle ? en.island.noTime : formatTime(remaining);
     const elapsed = timer.totalMs > 0 ? 1 - remaining / timer.totalMs : 0;
     progress.style.width = `${Math.min(100, Math.max(0, elapsed * 100))}%`;
   };

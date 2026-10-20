@@ -1,14 +1,14 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { renderStill, type PaletteName } from '../character';
-import { it } from '../i18n/it';
+import { en } from '../i18n/en';
 import type { Settings, Snapshot } from '../island/snapshot';
 import { shortcutLabel } from '../shared/shortcut';
 import './settings.css';
 
 // The settings window. Every change is sent to Rust at once (no "Save"
 // button); Rust checks it, stores it and answers with the values it kept.
-const t = it.settings;
+const t = en.settings;
 const PALETTES: PaletteName[] = ['lilla', 'menta', 'pesca'];
 
 const app = document.querySelector<HTMLDivElement>('#app');

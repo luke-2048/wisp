@@ -1,0 +1,102 @@
+{
+  "appName": "Wisp",
+  "tray": {
+    "tooltip": "Wisp",
+    "showHide": "Show/Hide",
+    "settings": "Settings",
+    "autostart": "Start with Windows",
+    "quit": "Quit",
+    "debug": "Debug: Wisp's state",
+    "automatic": "Automatic"
+  },
+  "island": {
+    "noTimer": "--",
+    "noTime": "--:--",
+    "now": "Now",
+    "taskPlaceholder": "What are you working on?",
+    "minutes": "min",
+    "otherDuration": "Other…",
+    "pause": "Pause",
+    "resume": "Resume",
+    "stop": "Stop",
+    "done": "Done"
+  },
+  "states": {
+    "focused": "Focused",
+    "distracted": "Distracted",
+    "break": "Take a break",
+    "waiting": "Waiting for you",
+    "done": "Done!",
+    "night": "Good night"
+  },
+  "ideas": {
+    "none": "No parked ideas",
+    "noneNew": "No new ideas",
+    "one": "1 parked idea",
+    "many": "{n} parked ideas",
+    "hint": "{shortcut} to add one",
+    "title": "Parked ideas",
+    "back": "Back",
+    "seen": "Seen",
+    "delete": "Delete",
+    "empty": "No ideas yet.",
+    "today": "today"
+  },
+  "park": {
+    "title": "Park an idea",
+    "placeholder": "Park an idea…",
+    "hint": "Enter"
+  },
+  "keys": {
+    "CommandOrControl": "Ctrl",
+    "Control": "Ctrl",
+    "Ctrl": "Ctrl",
+    "Shift": "Shift",
+    "Alt": "Alt",
+    "Super": "Win",
+    "Space": "Space"
+  },
+  "settings": {
+    "title": "Settings",
+    "autosave": "Changes are saved automatically.",
+    "look": "Appearance",
+    "palette": "Wisp's colour",
+    "palettes": {
+      "lilla": "Lilac",
+      "menta": "Mint",
+      "pesca": "Peach"
+    },
+    "ideas": "Idea parking",
+    "shortcut": "Shortcut",
+    "shortcutHelp": "Works from any app.",
+    "recording": "Press the keys…",
+    "needsModifier": "Use Ctrl or Alt together with a key.",
+    "shortcutTaken": "Another app already uses this shortcut.",
+    "shortcutInvalid": "This shortcut can't be used.",
+    "timer": "Timer",
+    "customMinutes": "Suggested length for “Other…”",
+    "breakAfter": "Suggest a break after",
+    "minutesOfFocus": "minutes of focus",
+    "minutes": "minutes",
+    "night": "Night",
+    "nightFrom": "Good night from",
+    "nightTo": "to"
+  },
+  "playground": {
+    "title": "Wisp — playground",
+    "hint": "Move the mouse, click, drag, pet it back and forth, or leave it alone.",
+    "state": "State",
+    "palette": "Colour",
+    "tuning": "Springs",
+    "stiffness": "stiffness",
+    "damping": "damping",
+    "springs": {
+      "expression": "Expression",
+      "look": "Gaze",
+      "home": "Back home",
+      "squash": "Squash"
+    },
+    "turn": "Turn strength",
+    "reset": "Reset"
+  }
+}
